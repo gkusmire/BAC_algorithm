@@ -25,7 +25,7 @@ public class HistogramCounter {
         return map.size();
     }
 
-    public double getAllElementsNumber(){
+    public long getAllElementsNumber(){
 
         return numberOfAllElements;
     }
@@ -36,5 +36,5 @@ public class HistogramCounter {
     }
 
     private Map<String, Pair<Double, Double>> map;
-    private double numberOfAllElements;
+    private long numberOfAllElements;
 }
