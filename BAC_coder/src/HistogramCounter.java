@@ -7,7 +7,7 @@ public class HistogramCounter {
         map = new HashMap<>();
     }
 
-    public void addElement(String elem) {
+    public void addElement(Integer elem) {
 
         if(!map.containsKey(elem)) {
             map.put(elem, new Pair<>(1.0, 0.0));
@@ -30,11 +30,11 @@ public class HistogramCounter {
         return numberOfAllElements;
     }
 
-    public Map<String, Pair<Double, Double>> getHistogramValues() {
+    public Map<Integer, Pair<Double, Double>> getHistogramValues() {
 
         return map;
     }
 
-    private Map<String, Pair<Double, Double>> map;
+    private Map<Integer, Pair<Double, Double>> map;
     private long numberOfAllElements;
 }

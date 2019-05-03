@@ -1,18 +1,29 @@
+import java.io.IOException;
 import java.util.Map;
 
 public class AlphabetIntervals {
 
-    public AlphabetIntervals(FileReader fileReader) {
+    public AlphabetIntervals(PGMFileReader fileReader) throws IOException {
 
         setAlphabetIntervals(fileReader);
     }
 
-    public Pair<Double, Double> getAlphabetElementInterval(String elem) {
+    public Pair<Double, Double> getAlphabetElementInterval(Integer elem) {
 
         return alphabetIntervals.get(elem);
     }
 
-    private void setAlphabetIntervals(FileReader fileReader) {
+    public void printAlphabetIntervals() {
+
+        System.out.println("AlphabetIntervals:");
+        for(Integer i : alphabetIntervals.keySet()) {
+
+            System.out.println(i + " <"+alphabetIntervals.get(i).leftVal()+";"+alphabetIntervals.get(i).rightVal()+">");
+        }
+        System.out.println("End of alphabet");
+    }
+
+    private void setAlphabetIntervals(PGMFileReader fileReader) throws IOException {
 
         HistogramCounter counter = new HistogramCounter();
 
@@ -24,40 +35,38 @@ public class AlphabetIntervals {
 
         double allElementsNumber = counter.getAllElementsNumber();
         double beginningOfInterval = 0.0;
-        double elementInterval = 0.0;
-        double endOfInterval = 0.0;
-        long nbOfElements = counter.getAllElementsNumber();
+        double elementInterval;
+        double endOfInterval;
 
         alphabetIntervals = counter.getHistogramValues();
 
-        for(String str : alphabetIntervals.keySet()) {
+        for(int str : alphabetIntervals.keySet()) {
 
             Pair<Double, Double> pair = alphabetIntervals.get(str);
             elementInterval = pair.leftVal()/allElementsNumber;
             endOfInterval = beginningOfInterval + elementInterval;
 
-            if(nbOfElements == 1){
+            if(endOfInterval > 1.0){
                 endOfInterval = 1.0;
             }
 
             alphabetIntervals.replace(str, new Pair<>(beginningOfInterval, endOfInterval));
-            System.out.println(str+" : "+ beginningOfInterval+"  "+endOfInterval);
 
             beginningOfInterval = endOfInterval;
-            nbOfElements -= 1;
         }
     }
 
-    private void fillInHistogramCounter(HistogramCounter counter, FileReader fileReader) {
+    private void fillInHistogramCounter(HistogramCounter counter, PGMFileReader fileReader) throws IOException {
 
-        fileReader.setCursorAtTheBeginningOfFile();
+        double iterNb = fileReader.getWidth() * fileReader.getHeight();
 
-        while(!fileReader.isEOF()) {
+        counter.addElement(fileReader.getWidth());
+        counter.addElement(fileReader.getHeight());
 
+        for (int i = 0; i < iterNb; ++i) {
             counter.addElement(fileReader.getElement());
         }
     }
 
-
-    private Map<String, Pair<Double, Double>> alphabetIntervals;
+    private Map<Integer, Pair<Double, Double>> alphabetIntervals;
 }
