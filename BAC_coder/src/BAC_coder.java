@@ -33,17 +33,17 @@ public class BAC_coder {
 
     public static void main(String[] args) {
 
-        	if(args.length<1)
-        	{
-        		System.out.println("Program ma za pierwszy argument nazwê pliku wejœciowego i za drugi opcjonalny nazwê pliku wyjœciowego!");
-        		return;
-        	}
-        	String inFileName=args[0];
-        	String outFileName;
-        	if(args.length>1)
-        		outFileName=args[0];
-        	else
-        		outFileName="encoded.txt";
-        	codeFromFileToFile(inFileName,outFileName);
+    	if(args.length<1)
+    	{
+    		System.out.println("Program ma za pierwszy argument nazwê pliku wejœciowego i za drugi opcjonalny nazwê pliku wyjœciowego!");
+    		return;
+    	}
+    	String inFileName=args[0];
+    	String outFileName;
+    	if(args.length>1)
+    		outFileName=args[0];
+    	else
+    		outFileName="encoded.txt";
+    	codeFromFileToFile(inFileName,outFileName);
     }
 }
