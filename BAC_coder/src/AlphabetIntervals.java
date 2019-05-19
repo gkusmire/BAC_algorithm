@@ -3,13 +3,13 @@ import java.util.Map;
 
 public class AlphabetIntervals {//TODO: mo¿e ta klasa powina siê inaczej nazywaæ, bo jest pojemnikiem na strukturê
 	
-	private final byte[] fileContent;
+	private final int[] fileContent;
 	
 	public static final int width=512;
 	public static final int length=512;
 
     public AlphabetIntervals(PGMFileReader fileReader) throws IOException {
-    	fileContent=new byte[width*length];
+    	fileContent=new int[width*length];
         setAlphabetIntervals(fileReader);
     }
 
@@ -71,11 +71,11 @@ public class AlphabetIntervals {//TODO: mo¿e ta klasa powina siê inaczej nazywaæ
         for (int i = 0; i < iterNb; ++i) {
         	int element=fileReader.getElement();
             counter.addElement(element);
-            fileContent[i]=(byte)element;
+            fileContent[i]=element;
         }
     }
     
-    public byte[] getFileContent() {//TODO nie podoba mi siê taka organizacja, ¿e to AlphabetIntervals czyta plik
+    public int[] getFileContent() {//TODO nie podoba mi siê taka organizacja, ¿e to AlphabetIntervals czyta plik
     	return fileContent;
     }
 

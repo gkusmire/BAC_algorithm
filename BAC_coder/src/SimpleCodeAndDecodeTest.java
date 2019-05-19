@@ -21,14 +21,18 @@ class SimpleCodeAndDecodeTest {
 		byte[] f2 = Files.readAllBytes(Path.of(s3));
 		double d=0;
 		double mean_distance=0;
+		String s="";
 		for(int i=0;i<f1.length;i++) {
 			if(f1[i]!=f2[i])
 			{
 				d++;
+				s+=i+":"+f1[i]+"->"+f2[i]+",";
 			}
 			mean_distance+=f1[i]-f2[i];
 		}
 		//odczyt zapis wymaga poprawienia, bo czasem przekrêca wartoœci
+		System.out.println(s);
+		System.out.println("d="+d);
 		System.out.println("Stopieñ zgodnoœci: "+((f1.length-d)/f1.length));
 		System.out.println("Œrednia ró¿nica wartoœci: "+(mean_distance/f1.length));
 		assertTrue(Arrays.equals(f1, f2));

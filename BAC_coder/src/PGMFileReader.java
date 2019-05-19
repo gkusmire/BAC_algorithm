@@ -11,7 +11,7 @@ public class PGMFileReader {
 
     public int getElement() throws IOException {
 
-        return dis.readByte();//ta metoda zwraca 8 bitów, wiêc dla porz¹dku zwracaamy byte
+        return dis.readUnsignedByte();//ta metoda zwraca 8 bitów, wiêc dla porz¹dku zwracaamy byte
     }
 
     public int getWidth() {

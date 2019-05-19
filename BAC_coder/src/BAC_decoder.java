@@ -31,7 +31,9 @@ public class BAC_decoder {
 		{
 			for(int i=0;i<width;i++)
 			{
-				image[j][i]=bytes[i+j*width];//TODO: sprawdziæ, czy obraz nie wyszed³ jakoœ obrócony
+				image[j][i]=(bytes[i+j*width] & 0xFF);
+				if(image[j][i]<0 || image[j][i]>255)
+					System.err.println("image[j][i]="+image[j][i]);
 			}
 		}
 		try {

@@ -50,7 +50,7 @@ public class PGMFileWriter {
             for (int i = 0; i < image.length; ++i) {
                 for (int j = 0; j < image[0].length; ++j) {
                     final int p = image[i][j];
-                    if (/*p < 0 ||*/ p > maxval)
+                    if (p < 0 || p > maxval)
                         throw new IOException("Pixel value " + p + " outside of range [0, " + maxval + "].");
                     stream.write(image[i][j]);
                 }
