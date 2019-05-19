@@ -2,6 +2,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class BAC_decoder {
 	
@@ -14,26 +16,22 @@ public class BAC_decoder {
 		//i statystyka te¿ zostanie z nich odtworzona
 		File inFile = new File(inFileName); 
 		StringBuilder sb=new StringBuilder(); 
+		byte bytes[];
 		try {
-			BufferedReader br = new BufferedReader(new FileReader(inFile)); 
-			String st; 
-			while ((st = br.readLine()) != null) 
-				sb.append(st);
-			br.close();
+			bytes=Files.readAllBytes(Path.of(inFileName));
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.err.println("B³¹d odczytu danych z pliku!!!");
+			return;
 		}
-		String output=decode(sb.toString());
-		int width=output.length();//TODO: pobraæ szerokoœæ
-		int height=1;//TODO: pobraæ szerokoœæ
+		int width=512;//TODO: pobraæ szerokoœæ, na razie ustalona jak w danych wejœciowych
+		int height=512;//TODO: pobraæ szerokoœæ
 		int image[][]=new int[width][height];
-		byte bytes[]=output.getBytes();
 		for(int j=0;j<height;j++)
 		{
 			for(int i=0;i<width;i++)
 			{
-				image[i][j]=bytes[i+j*width];//TODO: sprawdziæ, czy obraz nie wyszed³ jakoœ obrócony
+				image[j][i]=bytes[i+j*width];//TODO: sprawdziæ, czy obraz nie wyszed³ jakoœ obrócony
 			}
 		}
 		try {

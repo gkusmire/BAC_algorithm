@@ -4,8 +4,8 @@ import java.io.IOException;
 
 public class BAC_coder {
 	
-	public static String code(AlphabetIntervals alphabetIntervals) {//TODO: ta metoda ma zakodowaæ ci¹g znaków 
-		String s=alphabetIntervals.getFileContent();
+	public static byte[] code(AlphabetIntervals alphabetIntervals) {//TODO: ta metoda ma zakodowaæ ci¹g znaków 
+		byte[] s=alphabetIntervals.getFileContent();
 		//TODO: tu wstawiæ implementacjê alogrytmu kodowania
 		return s;
 	}
@@ -21,9 +21,9 @@ public class BAC_coder {
 			fileReader = new PGMFileReader(inFileName);
 			AlphabetIntervals alphabetIntervals = new AlphabetIntervals(fileReader);//TODO: s³abo, ¿e budowanie struktury nie jest oddzielone od czytania pliku
 			alphabetIntervals.printAlphabetIntervals();//tu bierzemy zwartoœæ ca³ego pliku
-			String output=code(alphabetIntervals);//wiêc tu te¿ kodujemy zawartoœæ ca³ego pliku
+			byte[] output=code(alphabetIntervals);//wiêc tu te¿ kodujemy zawartoœæ ca³ego pliku
 			BufferedWriter writer = new BufferedWriter(new FileWriter(outFileName));
-			writer.write(output);
+			writer.write(new String(output));
 			writer.close();
 		} catch (IOException e) {
 			e.printStackTrace();
