@@ -1,13 +1,53 @@
-import java.io.BufferedWriter;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class BAC_coder {
 	
 	public static int[] code(AlphabetIntervals alphabetIntervals) {//TODO: ta metoda ma zakodowaæ ci¹g znaków 
 		int[] s=alphabetIntervals.getFileContent();
-		//TODO: tu wstawiæ implementacjê alogrytmu kodowania
+		int d=0,dm1=0;
+		int g=255,gm1=255;
+		int r=g-d+1,rm1=g-d+1;
+		int ln=0;
+		Double pia=0.0;
+		Double pib=1.0;
+		StringBuilder wyjscie=new StringBuilder();
+		//Algorytm na slajdach jest s³abo zapisany, trudnop ustaliæ, co oznaczaj¹ symbole
+		for(int i=1;i<s.length;i++)
+		{
+			r=gm1-dm1+1;//R = G - D + 1
+			//absolutnie nie rozumiem, co tu ma oznaczaæ to N i k
+			d=(int) (dm1+rm1*alphabetIntervals.getAlphabetElementInterval(s[i]).leftVal());//D = D + R · N[k-1]/N
+			g=(int) (dm1+rm1*alphabetIntervals.getAlphabetElementInterval(s[i]).rightVal());//G = D + R · N[k]/N - 1
+			
+			rm1=r;
+			dm1=d;
+			gm1=g;
+			
+			if((d & 0x80000000) == (g & 0x80000000))
+			{
+				d<<=1;
+				g<<=1;
+				g+=1;
+				wyjscie.append((d & 0x80000000)>>31);//o takie wys³anie na wyjscie chodzi?
+				
+				if(ln>0)
+				{
+					//wyœlij ln bitów z k¹d? do k¹d? (1-b) - co to niby ma znaczyæ?
+					//chodzi o najstarsze bity d, czy g?
+					//trzeba robiæ na d albo g jakieœ przesuniêcie, czy te wys³ane bity zostaj¹?
+					//wyjscie.append(
+					ln=0;
+				}
+			}
+			
+			//tutaj te¿ zupe³ny be³kot, czy chodzi o na³o¿enie maski bitowej AND?
+			if((d & 0x40000000) == 1 && (g & 0x80000000) == 1)
+			{
+				ln=ln+1;
+			}
+		}
 		return s;
 	}
 	
