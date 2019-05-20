@@ -39,9 +39,9 @@ public class BAC_coder {
 			d = (int)Math.floor((double)old_d + (double)r * alphabetIntervals.getAlphabetElementInterval(s[i]).leftVal());//D = D + R · N[k-1]/N
 			g = (int)Math.floor((double)old_d + (double)r * alphabetIntervals.getAlphabetElementInterval(s[i]).rightVal() - 1);//G = D + R · N[k]/N - 1
 
-			// dopóki warunek #1 lub warunek #3 spe³nione
+			// dopóki warunek #1 lub warunek #2 spe³nione
 			while((d & half) == (g & half) || ((d >> (m - 2)) == 0b01 && ((g >> (m - 2)) == 0b01))) {
-				// warunek #1 - Jeœli MSB b w d i g jest jednakowy:
+				// warunek #1 - Jeœli b <- MSB w d i g jest jednakowy:
 				if ((d & half) == (g & half)) {
 					int b = (d & half) >> (m - 1); // równy MSB s³ów, do wys³ania na wyjœcie
 					// d - przesuniêcie w lewo o 1 i (implicite) uzupe³nienie zerem
@@ -63,7 +63,7 @@ public class BAC_coder {
 				// Sayood: warunek E_3 tj. nastêpuj¹ce mapowanie zwiêkszaj¹ce dwukrotnie szerokoœæ przedzia³u:
 				// [0.25, 0.75) -> [0,1), E_3(x) = 2(x - 0.25)
 				// trzeba to prze³o¿yæ na implementacjê binarn¹ ca³kowitoliczbow¹
-				if ((d >> (m - 2)) == 0b01 && ((g >> (m - 2)) == 0b01)) {
+				if ((d >> (m - 2)) == 0b01 && ((g >> (m - 2)) == 0b10)) {
 					//przesuñ w lewo bity obu rejestrów z wyj¹tkiem najbardziej
 					//znacz¹cych i uzupe³nij rejestry; LN = LN + 1
 					// d w lewo i 0 na LSB
@@ -88,8 +88,8 @@ public class BAC_coder {
 				sb >>= 1;
 			}
 		}
-		// i co teras? --- do pe³nych bajtów?
-
+		// i co teras? --- dos³aæ zera do pe³nych bajtów?
+		System.out.println(wyjscie.length()+": "+wyjscie);
 		return s;
 	}
 	
