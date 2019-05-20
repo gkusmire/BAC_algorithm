@@ -1,63 +1,95 @@
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.BitSet;
 
 public class BAC_coder {
 	
 	public static int[] code(AlphabetIntervals alphabetIntervals) {//TODO: ta metoda ma zakodowaæ ci¹g znaków 
 		int[] s=alphabetIntervals.getFileContent();
+
 		// inicjalizacja
 		// ustalamy pocz¹tkowe granice przedzia³u - dla dostêpnych 2^m wartoœci po m 0 i 1 w zapisie dwójkowym
-		// m=8    12345678
-		int d = 0b00000000,dm1=0; // ustalamy doln¹ granicê na (0...0)
-		int g = 0b11111111,gm1=255; // ustalamy górn¹ granicê na (1...1)
-		int r=g-d+1,rm1=g-d+1;
+		final int m = 8; // d³ugoœæ s³owa
+		// maksymalna wartoœæ - je¿eli wybieramy sobie dowoln¹ d³ugoœæ s³owa,
+		// trzeba pamiêtaæ o zastosowaniu maski bitowej do wyniku przesuniêcia bitowego
+		final int max = (int)Math.pow(2,m) - 1;
+		final int half = 0b1 << (m-1); // w praktyce: maska dla najstarszego bitu s³owa
+		final int quat = 0b1 << (m-2);// w praktyce: maska dla drugiego najstarszego bitu s³owa
+
+		int d = 0,dm1=0; // ustalamy doln¹ granicê na (0...0)
+		int g = max, gm1=255; // ustalamy górn¹ granicê na (1...1)
 		int ln=0; // licznik niedomiaru
+
 		Double pia=0.0;
 		Double pib=1.0;
+
+		// PLACEHOLDER wyjscie.append(wartosc_bitu) --- wypisywanie wyjœcia
 		StringBuilder wyjscie=new StringBuilder();
-		//Algorytm na slajdach jest s³abo zapisany, trudnop ustaliæ, co oznaczaj¹ symbole
+
 		for(int i=1;i<s.length;i++)
 		{
 			//r=gm1-dm1+1;//R = G - D + 1
-			r = g - d + 1; // obliczamy szerokoœæ przedzia³u
+			int r = g - d + 1; // obliczamy szerokoœæ przedzia³u
 
 			// N(k) to suma liczby wyst¹pieñ symboli 1..k
 			// N - ca³kowita liczba symboli w kodowanym ci¹gu
+			// pobranie kolejnego symbolu s[i]
 			int old_d = d;
-			d = Math.floor(old_d + r * alphabetIntervals.getAlphabetElementInterval(s[i].left));//D = D + R · N[k-1]/N
-			g = Math.floor(old_d + r * alphabetIntervals.getAlphabetElementInterval(s[i].right) - 1);//G = D + R · N[k]/N - 1
+			d = (int)Math.floor((double)old_d + (double)r * alphabetIntervals.getAlphabetElementInterval(s[i]).leftVal());//D = D + R · N[k-1]/N
+			g = (int)Math.floor((double)old_d + (double)r * alphabetIntervals.getAlphabetElementInterval(s[i]).rightVal() - 1);//G = D + R · N[k]/N - 1
 
-			rm1=r;
-			dm1=d;
-			gm1=g;
+			// dopóki warunek #1 lub warunek #3 spe³nione
+			while((d & half) == (g & half) || ((d >> (m - 2)) == 0b01 && ((g >> (m - 2)) == 0b01))) {
+				// warunek #1 - Jeœli MSB b w d i g jest jednakowy:
+				if ((d & half) == (g & half)) {
+					int b = (d & half) >> (m - 1); // równy MSB s³ów, do wys³ania na wyjœcie
+					// d - przesuniêcie w lewo o 1 i (implicite) uzupe³nienie zerem
+					d = (d << 1) & max;
+					// g - przesuniêcie w lewo o 1 i uzupe³nienie jedynk¹
+					g = ((g << 1) | 1) & max;
+					//WYS£ANIE b
+					wyjscie.append(b);
+					// jeœli licznik LN > 0, wyœlij LN bitów (1 ? b ); LN = 0, --- tj. (1 - b) jako realizacja negacji jednobitowej wartoœci
+					// Sayood: while(Scale3 > 0)
+					while (ln > 0) {
+						wyjscie.append(1 - b);
+						ln--;
+					}
 
-			// warunek #1 - Jeœli najstarszy bit b w D i G jest jednakowy:
-			if((d & 0x80000000) == (g & 0x80000000))
-			{
-				d<<=1;
-				g<<=1;
-				g+=1;
-				wyjscie.append((d & 0x80000000)>>31);//o takie wys³anie na wyjscie chodzi?
-				
-				if(ln>0)
-				{
-					//wyœlij ln bitów z k¹d? do k¹d? (1-b) - co to niby ma znaczyæ?
-					//chodzi o najstarsze bity d, czy g?
-					//trzeba robiæ na d albo g jakieœ przesuniêcie, czy te wys³ane bity zostaj¹?
-					//wyjscie.append(
-					ln=0;
 				}
-			}
-			// warunek #2 - Jeœli D = 0x01... a G = 0x10...:
-			//tutaj te¿ zupe³ny be³kot, czy chodzi o na³o¿enie maski bitowej AND?
-			if((d & 0x40000000) == 1 && (g & 0x80000000) == 1)
-			{
-				ln=ln+1;
+				// warunek #2
+				// wyk³ad: Jeœli D = 0x01... a G = 0x10...: --- rozumiem, ¿e jest to zapis w systemie binarnym (!)
+				// Sayood: warunek E_3 tj. nastêpuj¹ce mapowanie zwiêkszaj¹ce dwukrotnie szerokoœæ przedzia³u:
+				// [0.25, 0.75) -> [0,1), E_3(x) = 2(x - 0.25)
+				// trzeba to prze³o¿yæ na implementacjê binarn¹ ca³kowitoliczbow¹
+				if ((d >> (m - 2)) == 0b01 && ((g >> (m - 2)) == 0b01)) {
+					//przesuñ w lewo bity obu rejestrów z wyj¹tkiem najbardziej
+					//znacz¹cych i uzupe³nij rejestry; LN = LN + 1
+					// d w lewo i 0 na LSB
+					// czy tak wygl¹da "przesuniêcie w lewo z wyj¹tkiem MSB"?
+					// complement (new) MSB of d and g --- czyli zgadza siê z wyk³adem
+					// realizacja tutaj: przesuniêcie w lewo ale zamaskowanie (nowego) MSB i alternatywa ze starym MSB
+					d = ((d << 1) & (max >> 1)) | (d & (half));
+					// g w lewo i 1 na LSB
+					g = (((g << 1) | 1) & (max >> 1)) | (d & (half));
+
+					ln++;
+				}
 			}
 		}
 		// Jeœli nie ma wiêcej symboli zakoñczenie: dopisz do wyjœcia wszystkie znacz¹ce bity z d
-		// TODO --,,--
+		int sb = 1 << (m-1);
+		if(d > 0) { // s¹ znacz¹ce bity
+			while ((sb & d) == 0)
+				sb >>= 1;
+			while (sb > 0) {
+				wyjscie.append((sb & d) > 0 ? 1 : 0);
+				sb >>= 1;
+			}
+		}
+		// i co teras? --- do pe³nych bajtów?
+
 		return s;
 	}
 	
