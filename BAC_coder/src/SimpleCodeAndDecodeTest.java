@@ -15,7 +15,11 @@ class SimpleCodeAndDecodeTest {
 		final String s2="c.txt";
 		final String s3="out.pgm";
 		BAC_coder.codeFromFileToFile(s1, s2);
-		BAC_decoder.decodeFromFileToFile(s2, s3);
+		PGMFileReader fileReader;
+		fileReader = new PGMFileReader(s1);
+		AlphabetIntervals alphabetIntervals = new AlphabetIntervals(fileReader);
+
+		BAC_decoder.decodeFromFileToFile(s2, s3,alphabetIntervals);
 		byte[] f1 = Files.readAllBytes(Path.of(s1));
 		byte[] ft = Files.readAllBytes(Path.of(s2));
 		byte[] f2 = Files.readAllBytes(Path.of(s3));

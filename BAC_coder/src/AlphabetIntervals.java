@@ -1,7 +1,11 @@
 import java.io.IOException;
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Map;
+import java.util.List;
 
-public class AlphabetIntervals {//TODO: mo¿e ta klasa powina siê inaczej nazywaæ, bo jest pojemnikiem na strukturê
+
+public class AlphabetIntervals implements Serializable {//TODO: mo¿e ta klasa powina siê inaczej nazywaæ, bo jest pojemnikiem na strukturê
 	
 	private final int[] fileContent;
 	
@@ -16,6 +20,11 @@ public class AlphabetIntervals {//TODO: mo¿e ta klasa powina siê inaczej nazywaæ
     public Pair<Double, Double> getAlphabetElementInterval(Integer elem) {
 
         return alphabetIntervals.get(elem);
+    }
+
+    public Double getAlphabetElementFreq(Integer elem) {
+
+        return alphabetIntervals.get(elem).rightVal() - alphabetIntervals.get(elem).leftVal();
     }
 
     public void printAlphabetIntervals() {
@@ -48,25 +57,29 @@ public class AlphabetIntervals {//TODO: mo¿e ta klasa powina siê inaczej nazywaæ
         for(int str : alphabetIntervals.keySet()) {
 
             Pair<Double, Double> pair = alphabetIntervals.get(str);
-            elementInterval = pair.leftVal()/allElementsNumber;
+            elementInterval = pair.leftVal();
             endOfInterval = beginningOfInterval + elementInterval;
 
-            if(endOfInterval > 1.0){
-                endOfInterval = 1.0;
+            if(endOfInterval > allElementsNumber){
+                endOfInterval = allElementsNumber;
             }
+            // dodanie wartoœci
+            values.add(str);
 
             alphabetIntervals.replace(str, new Pair<>(beginningOfInterval, endOfInterval));
 
             beginningOfInterval = endOfInterval;
         }
+
+
     }
 
     private void fillInHistogramCounter(HistogramCounter counter, PGMFileReader fileReader) throws IOException {
 
         double iterNb = fileReader.getWidth() * fileReader.getHeight();
 
-        counter.addElement(fileReader.getWidth());
-        counter.addElement(fileReader.getHeight());
+        //counter.addElement(fileReader.getWidth());
+        //counter.addElement(fileReader.getHeight());
 
         for (int i = 0; i < iterNb; ++i) {
         	int element=fileReader.getElement();
@@ -79,5 +92,12 @@ public class AlphabetIntervals {//TODO: mo¿e ta klasa powina siê inaczej nazywaæ
     	return fileContent;
     }
 
+    public int getNumber() { return alphabetIntervals.size(); }
+
+    public int getNthSymbol(int index) {
+        return values.get(index);
+    }
+    // lista u¿ywanych wartoœci - w dekoderze potrzebny jest dostêp jako n-ty element z linii prawdopodobieñstw
+    private List<Integer> values = new ArrayList<>();
     private Map<Integer, Pair<Double, Double>> alphabetIntervals;
 }

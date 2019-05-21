@@ -5,7 +5,7 @@ import java.util.BitSet;
 
 public class BAC_coder {
 	
-	public static int[] code(AlphabetIntervals alphabetIntervals) {//TODO: ta metoda ma zakodowaæ ci¹g znaków 
+	public static int[] code(AlphabetIntervals alphabetIntervals) {//TODO: ta metoda ma zakodowaæ ci¹g znaków
 		int[] s=alphabetIntervals.getFileContent();
 
 		// inicjalizacja
@@ -20,6 +20,7 @@ public class BAC_coder {
 		int d = 0,dm1=0; // ustalamy doln¹ granicê na (0...0)
 		int g = max, gm1=255; // ustalamy górn¹ granicê na (1...1)
 		int ln=0; // licznik niedomiaru
+		final int totalCount = s.length;
 
 		Double pia=0.0;
 		Double pib=1.0;
@@ -36,8 +37,9 @@ public class BAC_coder {
 			// N - ca³kowita liczba symboli w kodowanym ci¹gu
 			// pobranie kolejnego symbolu s[i]
 			int old_d = d;
-			d = (int)Math.floor((double)old_d + (double)r * alphabetIntervals.getAlphabetElementInterval(s[i]).leftVal());//D = D + R · N[k-1]/N
-			g = (int)Math.floor((double)old_d + (double)r * alphabetIntervals.getAlphabetElementInterval(s[i]).rightVal() - 1);//G = D + R · N[k]/N - 1
+			Pair<Double, Double> ai = alphabetIntervals.getAlphabetElementInterval(s[i]);
+			d = (int)Math.floor((double)old_d + (double)r * ai.leftVal()/totalCount);//D = D + R · N[k-1]/N
+			g = (int)Math.floor((double)old_d + (double)r * ai.rightVal()/totalCount - 1);//G = D + R · N[k]/N - 1
 
 			// dopóki warunek #1 lub warunek #2 spe³nione
 			while((d & half) == (g & half) || ((d >> (m - 2)) == 0b01 && ((g >> (m - 2)) == 0b01))) {
@@ -72,7 +74,7 @@ public class BAC_coder {
 					// realizacja tutaj: przesuniêcie w lewo ale zamaskowanie (nowego) MSB i alternatywa ze starym MSB
 					d = ((d << 1) & (max >> 1)) | (d & (half));
 					// g w lewo i 1 na LSB
-					g = (((g << 1) | 1) & (max >> 1)) | (d & (half));
+					g = (((g << 1) | 1) & (max >> 1)) | (g & (half));
 
 					ln++;
 				}
@@ -89,7 +91,10 @@ public class BAC_coder {
 			}
 		}
 		// i co teras? --- dos³aæ zera do pe³nych bajtów?
+		for(int i = 0;i<wyjscie.length() % 8; ++i)
+			wyjscie.append(0);
 		System.out.println(wyjscie.length()+": "+wyjscie);
+
 		return s;
 	}
 	
