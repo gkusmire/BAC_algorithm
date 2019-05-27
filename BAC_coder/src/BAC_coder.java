@@ -25,8 +25,7 @@ public class BAC_coder {
 		Double pia=0.0;
 		Double pib=1.0;
 
-		// PLACEHOLDER wyjscie.append(wartosc_bitu) --- wypisywanie wyjœcia
-		StringBuilder wyjscie=new StringBuilder();
+		BitStream wyjscie = new BitStream();
 
 		for(int i=1;i<s.length;i++)
 		{
@@ -51,11 +50,11 @@ public class BAC_coder {
 					// g - przesuniêcie w lewo o 1 i uzupe³nienie jedynk¹
 					g = ((g << 1) | 1) & max;
 					//WYS£ANIE b
-					wyjscie.append(b);
+					wyjscie.put(b);
 					// jeœli licznik LN > 0, wyœlij LN bitów (1 ? b ); LN = 0, --- tj. (1 - b) jako realizacja negacji jednobitowej wartoœci
 					// Sayood: while(Scale3 > 0)
 					while (ln > 0) {
-						wyjscie.append(1 - b);
+						wyjscie.put(1 - b);
 						ln--;
 					}
 
@@ -86,14 +85,14 @@ public class BAC_coder {
 			while ((sb & d) == 0)
 				sb >>= 1;
 			while (sb > 0) {
-				wyjscie.append((sb & d) > 0 ? 1 : 0);
+				wyjscie.put((sb & d) > 0 ? 1 : 0);
 				sb >>= 1;
 			}
 		}
 		// i co teras? --- dos³aæ zera do pe³nych bajtów?
-		for(int i = 0;i<wyjscie.length() % 8; ++i)
-			wyjscie.append(0);
-		System.out.println(wyjscie.length()+": "+wyjscie);
+		for(int i = 0;i<wyjscie.getLength() % 8; ++i)
+			wyjscie.put(0);
+		System.out.println(wyjscie.getLength()+": "+wyjscie.asArray());
 
 		return s;
 	}
@@ -103,13 +102,14 @@ public class BAC_coder {
 	 * @param fileReader
 	 * @param outFileName
 	 */
-	public static void codeFromFileToFile(String inFileName, String outFileName) {
+	public static int[] codeFromFileToFile(String inFileName, String outFileName) {
 		PGMFileReader fileReader;
+		int [] output ={};
 		try {
 			fileReader = new PGMFileReader(inFileName);
 			AlphabetIntervals alphabetIntervals = new AlphabetIntervals(fileReader);//TODO: s³abo, ¿e budowanie struktury nie jest oddzielone od czytania pliku
 			alphabetIntervals.printAlphabetIntervals();//tu bierzemy zwartoœæ ca³ego pliku
-			int[] output=code(alphabetIntervals);//wiêc tu te¿ kodujemy zawartoœæ ca³ego pliku
+			output=code(alphabetIntervals);//wiêc tu te¿ kodujemy zawartoœæ ca³ego pliku
 			FileOutputStream fos = new FileOutputStream(outFileName);
 			byte[] ca=new byte[output.length];
 			for(int i=0;i<output.length;i++)
@@ -128,6 +128,7 @@ public class BAC_coder {
 			e.printStackTrace();
 			System.err.println("B³¹d odczytu danych z pliku!!!");
 		}
+		return output;
 	}
 
     public static void main(String[] args) {
