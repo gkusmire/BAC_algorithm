@@ -9,20 +9,20 @@ import java.util.List;
 
 public class BAC_decoder {
 	
-	public static Integer[] decode(Integer [] s, AlphabetIntervals alphabetIntervals) {
+	public static Integer[] decode(Integer [] s, BACFileReader fileReader) {
 		//int[] s=alphabetIntervals.getFileContent();
 		// PLACEHOLDER - interwa³y ze Ÿród³a
 
 		// pobranie statystyki
 
-		int totalCount = alphabetIntervals.getFileContent().length;
+		int totalCount = fileReader.getWidth() * fileReader.getHeight();
 
 		// dla wyjaœnienia algorytmu nale¿y zapoznaæ siê najpierw z algorytmem kodera
 		// dzia³a na analogicznej zasadzie
 
 		// inicjalizacja
 		// ustalamy pocz¹tkowe granice przedzia³u - dla dostêpnych 2^m wartoœci po m 0 i 1 w zapisie dwójkowym
-		final int m = 16; // d³ugoœæ s³owa
+		final int m = 20; // d³ugoœæ s³owa
 		// maksymalna wartoœæ - je¿eli wybieramy sobie dowoln¹ d³ugoœæ s³owa,
 		// trzeba pamiêtaæ o zastosowaniu maski bitowej do wyniku przesuniêcia bitowego
 		final int max = (int)Math.pow(2,m) - 1;
@@ -48,16 +48,16 @@ public class BAC_decoder {
 
 		for(;  i < s.length;++i) {
 			k = 0; // indeks dekodowanego symbolu
-			while( Math.floor(((t - d + 1) * totalCount - 1) / (g - d + 1)) >= alphabetIntervals.getAlphabetElementInterval(alphabetIntervals.getNthSymbol(k)).leftVal()) // leftVal bo od pocz¹tku
+			while((int) Math.floor(((float)(t - d + 1) * (float)totalCount - 1) / (float)(g - d + 1)) >= fileReader.getAlphabetElementInterval(fileReader.getNthSymbol(k)).leftVal()) // leftVal bo od pocz¹tku
 				k++;
 			// zdekoduj symbol x k-ty z linii prawdopodobieñstw
-			int x = alphabetIntervals.getNthSymbol(k);
+			int x = fileReader.getNthSymbol(k);
 			wyjscie.add(x);
 
 			//r=gm1-dm1+1;//R = G - D + 1
 			int r = g - d + 1; // obliczamy szerokoœæ przedzia³u
 			int old_d = d;
-			Pair<Integer, Integer> elem = alphabetIntervals.getAlphabetElementInterval(x); // zakres wystêpowania symbolu x
+			Pair<Integer, Integer> elem = fileReader.getAlphabetElementInterval(x); // zakres wystêpowania symbolu x
 			d = (int)Math.floor((double)old_d + (double)r * elem.leftVal());
 			g = (int)Math.floor((double)old_d + (double)r * elem.rightVal() - 1);
 
@@ -89,12 +89,10 @@ public class BAC_decoder {
 			}
 		}
 
-
-		System.out.println("Wynik dekodowania: " + wyjscie.size()+": "+wyjscie);
 		return s;
 	}
 	
-	public static void decodeFromFileToFile(String inFileName,String outFileName, AlphabetIntervals alphabetIntervals) {
+	public static void decodeFromFileToFile(String inFileName,String outFileName) {
 		//Rozumiem, ¿e informacjê o szerokoœci i wysokoœci mamy zapisan¹ w zakodowanych danych
 		//i statystyka te¿ zostanie z nich odtworzona
 		File inFile = new File(inFileName);
@@ -114,7 +112,8 @@ public class BAC_decoder {
 		System.out.println("Odczytane wymiary: " + width + "x"+height);
 		int dataSize = fileReader.getDataSize();
 		// TODO alphabetIntervals na podstawie fileReader
-		decode(fileReader.getData(),alphabetIntervals);
+		decode(fileReader.getData(),fileReader);
+		// TODO zapis zdekodowanego ci¹gu do pliku
 /*
 		int image[][]=new int[width][height];
 		for(int j=0;j<height;j++)

@@ -38,7 +38,7 @@ public class BACFileWriter {
             // szerokoœæ obrazka
             stream.write(Integer.toString(image.getWidth()).getBytes());
             stream.write("\n".getBytes());
-            // d³ugoœæ sekwencji
+            // d³ugoœæ sekwencji skompresowanej
             // jednostka --- bajt???
             stream.write(Integer.toString(data.length).getBytes());
             stream.write("\n".getBytes());

@@ -11,7 +11,7 @@ public class BAC_coder {
 
 		// inicjalizacja
 		// ustalamy pocz¹tkowe granice przedzia³u - dla dostêpnych 2^m wartoœci po m 0 i 1 w zapisie dwójkowym
-		final int m = 16; // d³ugoœæ s³owa
+		final int m = 20; // d³ugoœæ s³owa
 		// maksymalna wartoœæ - je¿eli wybieramy sobie dowoln¹ d³ugoœæ s³owa,
 		// trzeba pamiêtaæ o zastosowaniu maski bitowej do wyniku przesuniêcia bitowego
 		final int MAXVAL = (int)Math.pow(2,m) - 1;
@@ -38,10 +38,7 @@ public class BAC_coder {
 			d = old_d + (int)Math.floor((double)r * (double)ai.leftVal()/(double)totalCount);//D = D + R · N[k-1]/N
 			g = old_d + (int)Math.floor((double)r * (double)ai.rightVal()/(double)totalCount) - 1;//G = D + R · N[k]/N - 1
 
-            if(d > MAXVAL) throw(new ArithmeticException("d za du¿e 1"));
-            if(g > MAXVAL) throw(new ArithmeticException("g za du¿e 1"));
-            if(ai.leftVal() > ai.rightVal()) throw(new ArithmeticException("l > r ! 1"));
-            if(d > g) throw(new ArithmeticException("d>g! 1"));
+            if(d > g) throw(new ArithmeticException("d>g! Za ma³a dok³adnoœæ numeryczna!"));
 
 			// dopóki warunek #1 lub warunek #2 spe³nione
 			while(((d & half) == (g & half)) || ((d & half) < (g & half) && (d & quat) > (g & quat) )) {
@@ -95,7 +92,7 @@ public class BAC_coder {
 		// i co teras? --- dos³aæ zera do pe³nych bajtów?
 		for(int i = 0;i<wyjscie.getLength() % 8; ++i)
 			wyjscie.put(0);
-		System.out.println("Wyprowadzono " + wyjscie.getLength() + " bitów.");
+		System.out.println("Wyprowadzono " + wyjscie.getLength() + " bitów / " + wyjscie.asArray().length + " bajtów.");
 		return wyjscie.asArray();
 	}
 	

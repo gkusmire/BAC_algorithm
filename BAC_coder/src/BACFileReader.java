@@ -1,14 +1,12 @@
+import java.awt.geom.PathIterator;
 import java.io.*;
-import java.util.Scanner;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.*;
 
 public class BACFileReader {
     private int dataSize;
     private List<Integer> data;
     public BACFileReader(String _fileName) throws IOException {
-
+        alphabetIntervals = new HashMap<>();
         fileName = _fileName;
         data = new ArrayList<>();
         init(fileName);
@@ -68,7 +66,9 @@ public class BACFileReader {
             int symbol = stats[1 + i * 2];
             int count = stats[1 + i * 2 + 1];
             System.out.println("Symbol: " +symbol +" x " + count);
+
         }
+        fillAlphabetIntervals(Arrays.copyOfRange(stats, 1, stats.length));
 
     }
 
@@ -97,9 +97,35 @@ public class BACFileReader {
         }
     }
 
+    public Pair<Integer, Integer> getAlphabetElementInterval(Integer elem) {
+
+        return alphabetIntervals.get(elem);
+    }
+
+    private void fillAlphabetIntervals(Integer[] input) {
+        int lo = 0, hi = 0;
+        for(int i = 0; i < input.length/2; i++) {
+            lo = hi;
+            hi += input[2 * i + 1];
+            Integer symbol = input[2 * i];
+            alphabetIntervals.put(symbol, new Pair<>(lo,hi));
+            System.out.println(i + " : " + lo + " --- " + hi);
+            values.add(symbol);
+        }
+    }
+
     private FileInputStream fileInputStream;
     private DataInputStream dis;
     private Scanner scanner;
     private String fileName;
     private int width, height;
+
+    public int getNumber() { return alphabetIntervals.size(); }
+
+    public int getNthSymbol(int index) {
+        return values.get(index);
+    }
+    // lista u¿ywanych wartoœci - w dekoderze potrzebny jest dostêp jako n-ty element z linii prawdopodobieñstw
+    private List<Integer> values = new ArrayList<>();
+    private Map<Integer, Pair<Integer, Integer>> alphabetIntervals;
 }
