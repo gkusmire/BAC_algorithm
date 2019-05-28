@@ -18,12 +18,12 @@ public class AlphabetIntervals {//TODO: mo¿e ta klasa powina siê inaczej nazywaæ
         setAlphabetIntervals(fileReader);
     }
 
-    public Pair<Double, Double> getAlphabetElementInterval(Integer elem) {
+    public Pair<Integer, Integer> getAlphabetElementInterval(Integer elem) {
 
         return alphabetIntervals.get(elem);
     }
 
-    public Double getAlphabetElementFreq(Integer elem) {
+    public int getAlphabetElementCount(Integer elem) {
 
         return alphabetIntervals.get(elem).rightVal() - alphabetIntervals.get(elem).leftVal();
     }
@@ -48,16 +48,16 @@ public class AlphabetIntervals {//TODO: mo¿e ta klasa powina siê inaczej nazywaæ
 
     private void setIntervalsBasedOnHistogramCounter(HistogramCounter counter) {
 
-        double allElementsNumber = counter.getAllElementsNumber();
-        double beginningOfInterval = 0.0;
-        double elementInterval;
-        double endOfInterval;
+        Integer allElementsNumber = counter.getAllElementsNumber();
+        Integer beginningOfInterval = 0;
+        Integer elementInterval;
+        Integer endOfInterval;
 
         alphabetIntervals = counter.getHistogramValues();
 
         for(int str : alphabetIntervals.keySet()) {
 
-            Pair<Double, Double> pair = alphabetIntervals.get(str);
+            Pair<Integer, Integer> pair = alphabetIntervals.get(str);
             elementInterval = pair.leftVal();
             endOfInterval = beginningOfInterval + elementInterval;
 
@@ -103,5 +103,5 @@ public class AlphabetIntervals {//TODO: mo¿e ta klasa powina siê inaczej nazywaæ
     }
     // lista u¿ywanych wartoœci - w dekoderze potrzebny jest dostêp jako n-ty element z linii prawdopodobieñstw
     private List<Integer> values = new ArrayList<>();
-    private Map<Integer, Pair<Double, Double>> alphabetIntervals;
+    private Map<Integer, Pair<Integer, Integer>> alphabetIntervals;
 }

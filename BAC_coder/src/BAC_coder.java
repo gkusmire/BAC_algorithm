@@ -14,30 +14,26 @@ public class BAC_coder {
 		final int m = 8; // d³ugoœæ s³owa
 		// maksymalna wartoœæ - je¿eli wybieramy sobie dowoln¹ d³ugoœæ s³owa,
 		// trzeba pamiêtaæ o zastosowaniu maski bitowej do wyniku przesuniêcia bitowego
-		final int max = (int)Math.pow(2,m) - 1;
+		final int MAXVAL = (int)Math.pow(2,m) - 1;
 		final int half = 0b1 << (m-1); // w praktyce: maska dla najstarszego bitu s³owa
 		final int quat = 0b1 << (m-2);// w praktyce: maska dla drugiego najstarszego bitu s³owa
 
-		int d = 0,dm1=0; // ustalamy doln¹ granicê na (0...0)
-		int g = max, gm1=255; // ustalamy górn¹ granicê na (1...1)
+		int d = 0; // ustalamy doln¹ granicê na (0...0)
+		int g = MAXVAL; // ustalamy górn¹ granicê na (1...1)
 		int ln=0; // licznik niedomiaru
 		final int totalCount = s.length;
-
-		Double pia=0.0;
-		Double pib=1.0;
 
 		BitStream wyjscie = new BitStream();
 
 		for(int i=1;i<s.length;i++)
 		{
-			//r=gm1-dm1+1;//R = G - D + 1
 			int r = g - d + 1; // obliczamy szerokoœæ przedzia³u
 
 			// N(k) to suma liczby wyst¹pieñ symboli 1..k
 			// N - ca³kowita liczba symboli w kodowanym ci¹gu
 			// pobranie kolejnego symbolu s[i]
 			int old_d = d;
-			Pair<Double, Double> ai = alphabetIntervals.getAlphabetElementInterval(s[i]);
+			Pair<Integer, Integer> ai = alphabetIntervals.getAlphabetElementInterval(s[i]);
 			d = (int)Math.floor((double)old_d + (double)r * ai.leftVal()/totalCount);//D = D + R · N[k-1]/N
 			g = (int)Math.floor((double)old_d + (double)r * ai.rightVal()/totalCount - 1);//G = D + R · N[k]/N - 1
 
@@ -47,9 +43,9 @@ public class BAC_coder {
 				if ((d & half) == (g & half)) {
 					int b = (d & half) >> (m - 1); // równy MSB s³ów, do wys³ania na wyjœcie
 					// d - przesuniêcie w lewo o 1 i (implicite) uzupe³nienie zerem
-					d = (d << 1) & max;
+					d = (d << 1) & MAXVAL;
 					// g - przesuniêcie w lewo o 1 i uzupe³nienie jedynk¹
-					g = ((g << 1) | 1) & max;
+					g = ((g << 1) | 1) & MAXVAL;
 					//WYS£ANIE b
 					wyjscie.put(b);
 					// jeœli licznik LN > 0, wyœlij LN bitów (1 ? b ); LN = 0, --- tj. (1 - b) jako realizacja negacji jednobitowej wartoœci
@@ -72,9 +68,9 @@ public class BAC_coder {
 					// czy tak wygl¹da "przesuniêcie w lewo z wyj¹tkiem MSB"?
 					// complement (new) MSB of d and g --- czyli zgadza siê z wyk³adem
 					// realizacja tutaj: przesuniêcie w lewo ale zamaskowanie (nowego) MSB i alternatywa ze starym MSB
-					d = ((d << 1) & (max >> 1)) | (d & (half));
+					d = ((d << 1) & (MAXVAL >> 1)) | (d & (half));
 					// g w lewo i 1 na LSB
-					g = (((g << 1) | 1) & (max >> 1)) | (g & (half));
+					g = (((g << 1) | 1) & (MAXVAL >> 1)) | (g & (half));
 
 					ln++;
 				}
@@ -93,7 +89,6 @@ public class BAC_coder {
 		// i co teras? --- dos³aæ zera do pe³nych bajtów?
 		for(int i = 0;i<wyjscie.getLength() % 8; ++i)
 			wyjscie.put(0);
-		System.out.println(wyjscie.getLength()+": "+wyjscie.asArray());
 
 		return wyjscie.asArray();
 	}

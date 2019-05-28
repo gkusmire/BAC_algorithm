@@ -43,16 +43,18 @@ public class BACFileReader {
         String bytesPerWord = scanner.nextLine();
         String pictureSize = scanner.nextLine();
         String _dataSize = scanner.nextLine();
+        // ile symboli i te symbole (jako czytelne liczby)
+        String _stats = scanner.nextLine();
 
         fileInputStream.close();
 
         String[] sizeString = pictureSize.split(" ");
 
         int BytesPerWord = Integer.parseInt(bytesPerWord);
-        System.out.println("BPW: " + BytesPerWord);
         width = Integer.parseInt(sizeString[0]);
         height = Integer.parseInt(sizeString[1]);
         dataSize = Integer.parseInt(_dataSize);
+        //
     }
 
     private void initPGMPictureReader(String fileName) throws IOException {
@@ -65,7 +67,7 @@ public class BACFileReader {
 
     private void skipHeader() throws IOException {
 
-        int numnewlines = 4;
+        int numnewlines = 5;
         while (numnewlines > 0) {
             char c;
             do {

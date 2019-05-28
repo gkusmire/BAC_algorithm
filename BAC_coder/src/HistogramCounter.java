@@ -3,19 +3,19 @@ import java.util.*;
 public class HistogramCounter {
 
     public HistogramCounter() {
-
+        numberOfAllElements = 0;
         map = new HashMap<>();
     }
 
     public void addElement(Integer elem) {
 
         if(!map.containsKey(elem)) {
-            map.put(elem, new Pair<>(1.0, 0.0));
+            map.put(elem, new Pair<>(1, 0));
         }
         else {
-            Pair<Double, Double> pair = map.get(elem);
+            Pair<Integer,Integer> pair = map.get(elem);
 
-            map.replace(elem, new Pair<>(pair.leftVal()+1, 0.0));
+            map.replace(elem, new Pair<>(pair.leftVal()+1, 0));
         }
         numberOfAllElements += 1;
     }
@@ -25,16 +25,15 @@ public class HistogramCounter {
         return map.size();
     }
 
-    public long getAllElementsNumber(){
+    public Integer getAllElementsNumber(){
 
         return numberOfAllElements;
     }
 
-    public Map<Integer, Pair<Double, Double>> getHistogramValues() {
-
+    public Map<Integer, Pair<Integer, Integer>> getHistogramValues() {
         return map;
     }
 
-    private Map<Integer, Pair<Double, Double>> map;
-    private long numberOfAllElements;
+    private Map<Integer, Pair<Integer, Integer>> map;
+    private Integer numberOfAllElements;
 }

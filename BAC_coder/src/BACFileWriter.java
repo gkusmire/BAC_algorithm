@@ -42,6 +42,12 @@ public class BACFileWriter {
             // jednostka --- bajt???
             stream.write(Integer.toString(data.length).getBytes());
             stream.write("\n".getBytes());
+            // statystyki
+            stream.write(Integer.toString(image.getNumber()).getBytes());
+            for(int i = 0; i < image.getNumber(); ++i)
+                stream.write((" "+image.getNthSymbol(i) + " " + image.getAlphabetElementCount(image.getNthSymbol(i))).getBytes());
+
+            stream.write("\n".getBytes());
             for (int i = 0; i < data.length; ++i) {
                     final int p = data[i];
 

@@ -55,7 +55,7 @@ public class BAC_decoder {
 			//r=gm1-dm1+1;//R = G - D + 1
 			int r = g - d + 1; // obliczamy szerokoœæ przedzia³u
 			int old_d = d;
-			Pair<Double, Double> elem = alphabetIntervals.getAlphabetElementInterval(x); // zakres wystêpowania symbolu x
+			Pair<Integer, Integer> elem = alphabetIntervals.getAlphabetElementInterval(x); // zakres wystêpowania symbolu x
 			d = (int)Math.floor((double)old_d + (double)r * elem.leftVal());
 			g = (int)Math.floor((double)old_d + (double)r * elem.rightVal() - 1);
 
