@@ -6,12 +6,12 @@ import java.util.BitSet;
 
 public class BAC_coder {
 	
-	public static Integer[] code(AlphabetIntervals alphabetIntervals) {//TODO: ta metoda ma zakodowaæ ci¹g znaków
+	public static Integer[] code(AlphabetIntervals alphabetIntervals) throws ArithmeticException {//TODO: ta metoda ma zakodowaæ ci¹g znaków
 		int[] s=alphabetIntervals.getFileContent();
 
 		// inicjalizacja
 		// ustalamy pocz¹tkowe granice przedzia³u - dla dostêpnych 2^m wartoœci po m 0 i 1 w zapisie dwójkowym
-		final int m = 8; // d³ugoœæ s³owa
+		final int m = 16; // d³ugoœæ s³owa
 		// maksymalna wartoœæ - je¿eli wybieramy sobie dowoln¹ d³ugoœæ s³owa,
 		// trzeba pamiêtaæ o zastosowaniu maski bitowej do wyniku przesuniêcia bitowego
 		final int MAXVAL = (int)Math.pow(2,m) - 1;
@@ -34,11 +34,17 @@ public class BAC_coder {
 			// pobranie kolejnego symbolu s[i]
 			int old_d = d;
 			Pair<Integer, Integer> ai = alphabetIntervals.getAlphabetElementInterval(s[i]);
-			d = old_d + r * ai.leftVal()/totalCount;//D = D + R · N[k-1]/N
-			g = old_d + r * ai.rightVal()/totalCount - 1;//G = D + R · N[k]/N - 1
+
+			d = old_d + (int)Math.floor((double)r * (double)ai.leftVal()/(double)totalCount);//D = D + R · N[k-1]/N
+			g = old_d + (int)Math.floor((double)r * (double)ai.rightVal()/(double)totalCount) - 1;//G = D + R · N[k]/N - 1
+
+            if(d > MAXVAL) throw(new ArithmeticException("d za du¿e 1"));
+            if(g > MAXVAL) throw(new ArithmeticException("g za du¿e 1"));
+            if(ai.leftVal() > ai.rightVal()) throw(new ArithmeticException("l > r ! 1"));
+            if(d > g) throw(new ArithmeticException("d>g! 1"));
 
 			// dopóki warunek #1 lub warunek #2 spe³nione
-			while(((d & half) == (g & half)) || (((d >> (m - 2)) == 0b01) && (((g >> (m - 2)) == 0b10)))) {
+			while(((d & half) == (g & half)) || ((d & half) < (g & half) && (d & quat) > (g & quat) )) {
 				// warunek #1 - Jeœli b <- MSB w d i g jest jednakowy:
 				if ((d & half) == (g & half)) {
 					int b = (d & half) >> (m - 1); // równy MSB s³ów, do wys³ania na wyjœcie
@@ -48,20 +54,20 @@ public class BAC_coder {
 					g = ((g << 1) | 1) & MAXVAL;
 					//WYS£ANIE b
 					wyjscie.put(b);
-					// jeœli licznik LN > 0, wyœlij LN bitów (1 ? b ); LN = 0, --- tj. (1 - b) jako realizacja negacji jednobitowej wartoœci
+					// jeœli licznik LN > 0, wyœlij LN bitów (1 - b ); LN = 0, --- tj. (1 - b) jako realizacja negacji jednobitowej wartoœci
 					// Sayood: while(Scale3 > 0)
 					while (ln > 0) {
 						wyjscie.put(1 - b);
 						ln--;
 					}
-
 				}
-				// warunek #2
+
+                // warunek #2
 				// wyk³ad: Jeœli D = 0x01... a G = 0x10...: --- rozumiem, ¿e jest to zapis w systemie binarnym (!)
 				// Sayood: warunek E_3 tj. nastêpuj¹ce mapowanie zwiêkszaj¹ce dwukrotnie szerokoœæ przedzia³u:
 				// [0.25, 0.75) -> [0,1), E_3(x) = 2(x - 0.25)
 				// trzeba to prze³o¿yæ na implementacjê binarn¹ ca³kowitoliczbow¹
-				if (((d >> (m - 2)) == 0b01) && (((g >> (m - 2)) == 0b10))) {
+				if ((d & half) < (g & half) && (d & quat) > (g & quat) ) {
 					//przesuñ w lewo bity obu rejestrów z wyj¹tkiem najbardziej
 					//znacz¹cych i uzupe³nij rejestry; LN = LN + 1
 					// d w lewo i 0 na LSB
@@ -74,7 +80,7 @@ public class BAC_coder {
 
 					ln++;
 				}
-			}
+            }
 		}
 		// Jeœli nie ma wiêcej symboli zakoñczenie: dopisz do wyjœcia wszystkie znacz¹ce bity z d
 		int sb = 1 << (m-1);
