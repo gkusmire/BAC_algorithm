@@ -7,6 +7,11 @@ public class HistogramCounter {
         map = new HashMap<>();
     }
 
+    public HistogramCounter(Map<Integer, Pair<Integer,Integer>> histogram) {
+        numberOfAllElements = 0;
+        map = histogram;
+    }
+
     public void addElement(Integer elem) {
 
         if(!map.containsKey(elem)) {

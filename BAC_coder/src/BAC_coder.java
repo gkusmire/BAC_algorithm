@@ -34,11 +34,11 @@ public class BAC_coder {
 			// pobranie kolejnego symbolu s[i]
 			int old_d = d;
 			Pair<Integer, Integer> ai = alphabetIntervals.getAlphabetElementInterval(s[i]);
-			d = (int)Math.floor((double)old_d + (double)r * ai.leftVal()/totalCount);//D = D + R · N[k-1]/N
-			g = (int)Math.floor((double)old_d + (double)r * ai.rightVal()/totalCount - 1);//G = D + R · N[k]/N - 1
+			d = old_d + r * ai.leftVal()/totalCount;//D = D + R · N[k-1]/N
+			g = old_d + r * ai.rightVal()/totalCount - 1;//G = D + R · N[k]/N - 1
 
 			// dopóki warunek #1 lub warunek #2 spe³nione
-			while((d & half) == (g & half) || ((d >> (m - 2)) == 0b01 && ((g >> (m - 2)) == 0b01))) {
+			while(((d & half) == (g & half)) || (((d >> (m - 2)) == 0b01) && (((g >> (m - 2)) == 0b10)))) {
 				// warunek #1 - Jeœli b <- MSB w d i g jest jednakowy:
 				if ((d & half) == (g & half)) {
 					int b = (d & half) >> (m - 1); // równy MSB s³ów, do wys³ania na wyjœcie
@@ -61,7 +61,7 @@ public class BAC_coder {
 				// Sayood: warunek E_3 tj. nastêpuj¹ce mapowanie zwiêkszaj¹ce dwukrotnie szerokoœæ przedzia³u:
 				// [0.25, 0.75) -> [0,1), E_3(x) = 2(x - 0.25)
 				// trzeba to prze³o¿yæ na implementacjê binarn¹ ca³kowitoliczbow¹
-				if ((d >> (m - 2)) == 0b01 && ((g >> (m - 2)) == 0b10)) {
+				if (((d >> (m - 2)) == 0b01) && (((g >> (m - 2)) == 0b10))) {
 					//przesuñ w lewo bity obu rejestrów z wyj¹tkiem najbardziej
 					//znacz¹cych i uzupe³nij rejestry; LN = LN + 1
 					// d w lewo i 0 na LSB
@@ -89,7 +89,7 @@ public class BAC_coder {
 		// i co teras? --- dos³aæ zera do pe³nych bajtów?
 		for(int i = 0;i<wyjscie.getLength() % 8; ++i)
 			wyjscie.put(0);
-
+		System.out.println("Wyprowadzono " + wyjscie.getLength() + " bitów.");
 		return wyjscie.asArray();
 	}
 	

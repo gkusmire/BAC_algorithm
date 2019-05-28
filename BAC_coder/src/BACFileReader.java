@@ -1,12 +1,16 @@
 import java.io.*;
 import java.util.Scanner;
 import java.util.Arrays;
+import java.util.List;
+import java.util.ArrayList;
 
 public class BACFileReader {
     private int dataSize;
+    private List<Integer> data;
     public BACFileReader(String _fileName) throws IOException {
 
         fileName = _fileName;
+        data = new ArrayList<>();
         init(fileName);
     }
 
@@ -68,12 +72,17 @@ public class BACFileReader {
 
     }
 
+    public Integer[] getData() { return data.toArray(Integer[]::new); }
+
     private void initReader(String fileName) throws IOException {
 
         fileInputStream = new FileInputStream(fileName);
         dis = new DataInputStream(fileInputStream);
 
         skipHeader();
+
+        for(int i = 0; i<getDataSize();++i)
+            data.add(getElement());
     }
 
     private void skipHeader() throws IOException {

@@ -4,10 +4,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BAC_decoder {
 	
-	public static String decode(String s, AlphabetIntervals alphabetIntervals) {
+	public static Integer[] decode(Integer [] s, AlphabetIntervals alphabetIntervals) {
 		//int[] s=alphabetIntervals.getFileContent();
 		// PLACEHOLDER - interwa³y ze Ÿród³a
 
@@ -33,24 +35,24 @@ public class BAC_decoder {
 		int k = 0; // numer dekodowanego bitu
 		int t = 0b0; // dekodowane s³owo (?)
 
-		Double pia=0.0;
-		Double pib=1.0;
-
 		// PLACEHOLDER wyjscie.append(wartosc_bitu) --- wypisywanie wyjœcia
-		StringBuilder wyjscie=new StringBuilder();
+		List<Integer> wyjscie = new ArrayList<>();
 
 		// wczytanie m bitów z wejœcia do s³owa t
 		int i;
-		for(i = 0; i<m && i < s.length();++i)
-			t = (t<<1) + (s.charAt(k++)=='1' ? 1 : 0 );
+		for(i = 0; i<m && i < s.length;++i) {
+			t = s[k];
+			k++;
+		}
 		//
 
-		for(;  i < s.length();++i) {
+		for(;  i < s.length;++i) {
 			k = 0; // indeks dekodowanego symbolu
 			while( Math.floor(((t - d + 1) * totalCount - 1) / (g - d + 1)) >= alphabetIntervals.getAlphabetElementInterval(alphabetIntervals.getNthSymbol(k)).leftVal()) // leftVal bo od pocz¹tku
 				k++;
 			// zdekoduj symbol x k-ty z linii prawdopodobieñstw
 			int x = alphabetIntervals.getNthSymbol(k);
+			wyjscie.add(x);
 
 			//r=gm1-dm1+1;//R = G - D + 1
 			int r = g - d + 1; // obliczamy szerokoœæ przedzia³u
@@ -69,7 +71,7 @@ public class BAC_decoder {
 					// g - przesuniêcie w lewo o 1 i uzupe³nienie jedynk¹
 					g = ((g << 1) | 1) & max;
 					// wczytanie nastêpnego bitu ze strumienia w miejsce MSB
-					t  = ((t<<1) & max) + s.charAt(k);
+					t  = ((t<<1) & max) + s[k];
 					k++;
 				}
 				// warunek #2
@@ -79,7 +81,7 @@ public class BAC_decoder {
 					d = ((d << 1) & (max >> 1)) | (d & (half));
 					g = (((g << 1) | 1) & (max >> 1)) | (g & (half));
 					// s³owo t w lewo o 1 bit i wczytaj nastêpny bit ze strumienia wejœciowego na LSB
-					t = ((t << 1) & max) + s.charAt(k);
+					t = ((t << 1) & max) + s[k];
 					k++;
 					// complement (new) MSB of g, d, t
 					// TODO
@@ -87,10 +89,8 @@ public class BAC_decoder {
 			}
 		}
 
-		// i co teras? --- dos³aæ zera do pe³nych bajtów?
-		for(int j = 0;j<wyjscie.length() % 8; ++j)
-			wyjscie.append(0);
-		System.out.println(wyjscie.length()+": "+wyjscie);
+
+		System.out.println("Wynik dekodowania: " + wyjscie.size()+": "+wyjscie);
 		return s;
 	}
 	
@@ -98,17 +98,24 @@ public class BAC_decoder {
 		//Rozumiem, ¿e informacjê o szerokoœci i wysokoœci mamy zapisan¹ w zakodowanych danych
 		//i statystyka te¿ zostanie z nich odtworzona
 		File inFile = new File(inFileName);
-		StringBuilder sb=new StringBuilder(); 
+		StringBuilder sb=new StringBuilder();
+		BACFileReader fileReader;
 		byte bytes[];
 		try {
 			bytes=Files.readAllBytes(Path.of(inFileName));
+			 fileReader = new BACFileReader("test.bac");
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.err.println("B³¹d odczytu danych z pliku!!!");
 			return;
 		}
-		int width=512;//TODO: pobraæ szerokoœæ, na razie ustalona jak w danych wejœciowych
-		int height=512;//TODO: pobraæ szerokoœæ
+		int width=fileReader.getWidth();
+		int height=fileReader.getHeight();
+		System.out.println("Odczytane wymiary: " + width + "x"+height);
+		int dataSize = fileReader.getDataSize();
+		// TODO alphabetIntervals na podstawie fileReader
+		decode(fileReader.getData(),alphabetIntervals);
+/*
 		int image[][]=new int[width][height];
 		for(int j=0;j<height;j++)
 		{
@@ -125,6 +132,7 @@ public class BAC_decoder {
 			e.printStackTrace();
 			System.err.println("B³¹d zapisu danych do pliku!!!");
 		}
+		*/
 	}
 
 	public static void main(String[] args) {
