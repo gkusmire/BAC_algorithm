@@ -14,7 +14,7 @@ class SimpleCodeAndDecodeTest {
 		final String s1="uniform.pgm";//albo co kto chce
 		final String s2="c.txt";
 		final String s3="out.pgm";
-		BAC_coder.codeFromFileToFile(s1, s2);
+		Integer[] out = BAC_coder.codeFromFileToFile(s1, s2);
 		PGMFileReader fileReader;
 		fileReader = new PGMFileReader(s1);
 		AlphabetIntervals alphabetIntervals = new AlphabetIntervals(fileReader);

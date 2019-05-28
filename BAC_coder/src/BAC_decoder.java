@@ -97,7 +97,7 @@ public class BAC_decoder {
 	public static void decodeFromFileToFile(String inFileName,String outFileName, AlphabetIntervals alphabetIntervals) {
 		//Rozumiem, ¿e informacjê o szerokoœci i wysokoœci mamy zapisan¹ w zakodowanych danych
 		//i statystyka te¿ zostanie z nich odtworzona
-		File inFile = new File(inFileName); 
+		File inFile = new File(inFileName);
 		StringBuilder sb=new StringBuilder(); 
 		byte bytes[];
 		try {

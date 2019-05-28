@@ -1,13 +1,14 @@
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.List;
 
 
-public class AlphabetIntervals implements Serializable {//TODO: mo¿e ta klasa powina siê inaczej nazywaæ, bo jest pojemnikiem na strukturê
+public class AlphabetIntervals {//TODO: mo¿e ta klasa powina siê inaczej nazywaæ, bo jest pojemnikiem na strukturê
 	
 	private final int[] fileContent;
+	// TODO
+	public int getSymbolSize() { return 4; };
 	
 	public static final int width=512;
 	public static final int length=512;
@@ -87,9 +88,12 @@ public class AlphabetIntervals implements Serializable {//TODO: mo¿e ta klasa po
             fileContent[i]=element;
         }
     }
-    
+
     public int[] getFileContent() {//TODO nie podoba mi siê taka organizacja, ¿e to AlphabetIntervals czyta plik
-    	return fileContent;
+        return fileContent;
+    }
+    public int getWidth() {//TODO nie podoba mi siê taka organizacja, ¿e to AlphabetIntervals czyta plik
+        return width;
     }
 
     public int getNumber() { return alphabetIntervals.size(); }

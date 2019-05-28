@@ -1,11 +1,12 @@
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.BitSet;
 
 public class BAC_coder {
 	
-	public static int[] code(AlphabetIntervals alphabetIntervals) {//TODO: ta metoda ma zakodowaæ ci¹g znaków
+	public static Integer[] code(AlphabetIntervals alphabetIntervals) {//TODO: ta metoda ma zakodowaæ ci¹g znaków
 		int[] s=alphabetIntervals.getFileContent();
 
 		// inicjalizacja
@@ -94,7 +95,7 @@ public class BAC_coder {
 			wyjscie.put(0);
 		System.out.println(wyjscie.getLength()+": "+wyjscie.asArray());
 
-		return s;
+		return wyjscie.asArray();
 	}
 	
 	/**
@@ -102,11 +103,13 @@ public class BAC_coder {
 	 * @param fileReader
 	 * @param outFileName
 	 */
-	public static int[] codeFromFileToFile(String inFileName, String outFileName) {
+	public static Integer[] codeFromFileToFile(String inFileName, String outFileName) {
 		PGMFileReader fileReader;
-		int [] output ={};
+		BACFileWriter fileWriter;
+		Integer [] output ={};
 		try {
 			fileReader = new PGMFileReader(inFileName);
+			fileWriter = new BACFileWriter();
 			AlphabetIntervals alphabetIntervals = new AlphabetIntervals(fileReader);//TODO: s³abo, ¿e budowanie struktury nie jest oddzielone od czytania pliku
 			alphabetIntervals.printAlphabetIntervals();//tu bierzemy zwartoœæ ca³ego pliku
 			output=code(alphabetIntervals);//wiêc tu te¿ kodujemy zawartoœæ ca³ego pliku
@@ -114,13 +117,14 @@ public class BAC_coder {
 			byte[] ca=new byte[output.length];
 			for(int i=0;i<output.length;i++)
 			{
-				ca[i]=(byte)output[i];
+				ca[i]=(byte)output[i].intValue();
 				if(output[i]<0 || output[i]>255)
 					System.err.println("output[i]="+output[i]);
 				if((ca[i]&0xFF) != output[i]) {
 					System.err.println("ca[i]&0xFF="+(ca[i]&0xFF)+" output[i]="+output[i]);
 				}
 			}
+			fileWriter.write(output,alphabetIntervals,new File("test.bac"));
 			fos.write(ca,0,ca.length);
 			fos.flush();
 			fos.close();

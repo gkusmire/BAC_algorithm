@@ -11,7 +11,7 @@ public class BitStream {
         list = new ArrayList<>();
     }
 
-    public void put(Integer val) {
+    public void put(int val) {
         // TODO tylko 0 i 1 dopuszczalne
         val = (val == 0 ? 0 : 1);
 
@@ -28,7 +28,7 @@ public class BitStream {
     }
 
     public Integer getLength() { return length; };
-    Integer length;
-    final Integer bitsPerWord = Integer.BYTES * 8;
+    int length;
+    final Integer bitsPerWord = 8;
     private ArrayList<Integer> list;
 }
