@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.Scanner;
+import java.util.Arrays;
 
 public class BACFileReader {
     private int dataSize;
@@ -28,11 +29,11 @@ public class BACFileReader {
 
     private void init(String fileName) throws IOException {
 
-        setWidthAndHeightOfPicture(fileName);
-        initPGMPictureReader(fileName);
+        readBACHeader(fileName);
+        initReader(fileName);
     }
 
-    private void setWidthAndHeightOfPicture(String fileName) throws IOException {
+    private void readBACHeader(String fileName) throws IOException {
 
         fileInputStream = new FileInputStream(fileName);
         Scanner scanner = new Scanner(fileInputStream);
@@ -44,7 +45,7 @@ public class BACFileReader {
         String pictureSize = scanner.nextLine();
         String _dataSize = scanner.nextLine();
         // ile symboli i te symbole (jako czytelne liczby)
-        String _stats = scanner.nextLine();
+        String [] _stats = scanner.nextLine().split(" ");
 
         fileInputStream.close();
 
@@ -54,10 +55,20 @@ public class BACFileReader {
         width = Integer.parseInt(sizeString[0]);
         height = Integer.parseInt(sizeString[1]);
         dataSize = Integer.parseInt(_dataSize);
-        //
+        // parsowanie statystyk
+        Integer[] stats =  Arrays.stream(_stats).map(Integer::parseInt).toArray(Integer[]::new);
+        if(stats[0] * 2 + 1 != stats.length)
+            throw new IOException("Niepoprawny format statystyk!");
+        // TODO zapis statystyk do sensownej reprezentacji
+        for(int i = 0; i<stats[0]; ++i) {
+            int symbol = stats[1 + i * 2];
+            int count = stats[1 + i * 2 + 1];
+            System.out.println("Symbol: " +symbol +" x " + count);
+        }
+
     }
 
-    private void initPGMPictureReader(String fileName) throws IOException {
+    private void initReader(String fileName) throws IOException {
 
         fileInputStream = new FileInputStream(fileName);
         dis = new DataInputStream(fileInputStream);
