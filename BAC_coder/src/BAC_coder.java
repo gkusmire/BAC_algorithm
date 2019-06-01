@@ -11,7 +11,7 @@ public class BAC_coder {
 
 		// inicjalizacja
 		// ustalamy pocz¹tkowe granice przedzia³u - dla dostêpnych 2^m wartoœci po m 0 i 1 w zapisie dwójkowym
-		final int m = 20; // d³ugoœæ s³owa
+		final int m = 28; // d³ugoœæ s³owa
 		// maksymalna wartoœæ - je¿eli wybieramy sobie dowoln¹ d³ugoœæ s³owa,
 		// trzeba pamiêtaæ o zastosowaniu maski bitowej do wyniku przesuniêcia bitowego
 		final int MAXVAL = (int)Math.pow(2,m) - 1;
@@ -44,17 +44,20 @@ public class BAC_coder {
 			while(((d & half) == (g & half)) || ((d & half) < (g & half) && (d & quat) > (g & quat) )) {
 				// warunek #1 - Jeœli b <- MSB w d i g jest jednakowy:
 				if ((d & half) == (g & half)) {
-					int b = (d & half) >> (m - 1); // równy MSB s³ów, do wys³ania na wyjœcie
+					int bb = (d & half) >> (m - 1); // równy MSB s³ów, do wys³ania na wyjœcie
+					int b = bb>0 ? 1 : 0;
 					// d - przesuniêcie w lewo o 1 i (implicite) uzupe³nienie zerem
 					d = (d << 1) & MAXVAL;
 					// g - przesuniêcie w lewo o 1 i uzupe³nienie jedynk¹
 					g = ((g << 1) | 1) & MAXVAL;
 					//WYS£ANIE b
 					wyjscie.put(b);
+					System.out.print((b) > 0 ? "L" : "o");
 					// jeœli licznik LN > 0, wyœlij LN bitów (1 - b ); LN = 0, --- tj. (1 - b) jako realizacja negacji jednobitowej wartoœci
 					// Sayood: while(Scale3 > 0)
 					while (ln > 0) {
 						wyjscie.put(1 - b);
+						System.out.print(1-b > 0 ? "L" : "o");
 						ln--;
 					}
 				}
@@ -86,12 +89,16 @@ public class BAC_coder {
 				sb >>= 1;
 			while (sb > 0) {
 				wyjscie.put((sb & d) > 0 ? 1 : 0);
+				System.out.print((sb & d) > 0 ? "L" : "o");
 				sb >>= 1;
 			}
 		}
-		// i co teras? --- dos³aæ zera do pe³nych bajtów?
-		for(int i = 0;i<wyjscie.getLength() % 8; ++i)
+		// i co teras? --- dos³aæ zera do pe³nych s³ów
+		while(wyjscie.getLength()%8 != 0)
+		{
 			wyjscie.put(0);
+			System.out.print("o");
+		}
 		System.out.println("Wyprowadzono " + wyjscie.getLength() + " bitów / " + wyjscie.asArray().length + " bajtów.");
 		return wyjscie.asArray();
 	}
@@ -111,6 +118,7 @@ public class BAC_coder {
 			AlphabetIntervals alphabetIntervals = new AlphabetIntervals(fileReader);//TODO: s³abo, ¿e budowanie struktury nie jest oddzielone od czytania pliku
 			alphabetIntervals.printAlphabetIntervals();//tu bierzemy zwartoœæ ca³ego pliku
 			output=code(alphabetIntervals);//wiêc tu te¿ kodujemy zawartoœæ ca³ego pliku
+			/*
 			FileOutputStream fos = new FileOutputStream(outFileName);
 			byte[] ca=new byte[output.length];
 			for(int i=0;i<output.length;i++)
@@ -122,10 +130,12 @@ public class BAC_coder {
 					System.err.println("ca[i]&0xFF="+(ca[i]&0xFF)+" output[i]="+output[i]);
 				}
 			}
-			fileWriter.write(output,alphabetIntervals,new File("test.bac"));
 			fos.write(ca,0,ca.length);
 			fos.flush();
 			fos.close();
+			*/
+			fileWriter.write(output,alphabetIntervals,new File(outFileName));
+
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.err.println("B³¹d odczytu danych z pliku!!!");

@@ -9,7 +9,7 @@ import java.util.List;
 
 public class BAC_decoder {
 	
-	public static Integer[] decode(Integer [] s, BACFileReader fileReader) {
+	public static Integer[] decode(Integer [] s, BACFileReader fileReader) throws IOException{
 		//int[] s=alphabetIntervals.getFileContent();
 		// PLACEHOLDER - interwa³y ze Ÿród³a
 
@@ -22,7 +22,7 @@ public class BAC_decoder {
 
 		// inicjalizacja
 		// ustalamy pocz¹tkowe granice przedzia³u - dla dostêpnych 2^m wartoœci po m 0 i 1 w zapisie dwójkowym
-		final int m = 20; // d³ugoœæ s³owa
+		final int m = 28; // d³ugoœæ s³owa
 		// maksymalna wartoœæ - je¿eli wybieramy sobie dowoln¹ d³ugoœæ s³owa,
 		// trzeba pamiêtaæ o zastosowaniu maski bitowej do wyniku przesuniêcia bitowego
 		final int max = (int)Math.pow(2,m) - 1;
@@ -32,37 +32,37 @@ public class BAC_decoder {
 		int d = 0;   // ustalamy doln¹ granicê na (0...0)
 		int g = max; // ustalamy górn¹ granicê na (1...1)
 
-		int k = 0; // numer dekodowanego bitu
 		int t = 0b0; // dekodowane s³owo (?)
 
 		// PLACEHOLDER wyjscie.append(wartosc_bitu) --- wypisywanie wyjœcia
 		List<Integer> wyjscie = new ArrayList<>();
 
 		// wczytanie m bitów z wejœcia do s³owa t
-		int i;
-		for(i = 0; i<m && i < s.length;++i) {
-			t = s[k];
-			k++;
+		for(int i = 0; i<m && !fileReader.eof();++i) {
+			t = (t<<1) +  fileReader.get();
 		}
-		//
 
-		for(;  i < s.length;++i) {
-			k = 0; // indeks dekodowanego symbolu
-			while((int) Math.floor(((float)(t - d + 1) * (float)totalCount - 1) / (float)(g - d + 1)) >= fileReader.getAlphabetElementInterval(fileReader.getNthSymbol(k)).leftVal()) // leftVal bo od pocz¹tku
+		//
+		int count = 0;
+		while(!fileReader.eof() && count < totalCount) { // dopóki s¹ symbole
+			int k = 0; // indeks dekodowanego symbolu
+			while(k < fileReader.getNumber()-1 &&(int) Math.floor(((float)(t - d + 1) * (float)totalCount - 1) / (float)(g - d + 1)) >= fileReader.getAlphabetElementInterval(fileReader.getNthSymbol(k)).leftVal()) // leftVal bo od pocz¹tku
 				k++;
+			k = Math.min(k,fileReader.getNumber()-1);
 			// zdekoduj symbol x k-ty z linii prawdopodobieñstw
 			int x = fileReader.getNthSymbol(k);
 			wyjscie.add(x);
+			count++;
 
 			//r=gm1-dm1+1;//R = G - D + 1
 			int r = g - d + 1; // obliczamy szerokoœæ przedzia³u
 			int old_d = d;
 			Pair<Integer, Integer> elem = fileReader.getAlphabetElementInterval(x); // zakres wystêpowania symbolu x
-			d = (int)Math.floor((double)old_d + (double)r * elem.leftVal());
-			g = (int)Math.floor((double)old_d + (double)r * elem.rightVal() - 1);
+			d = old_d + (int)Math.floor((double)r *  (double)elem.leftVal() / (double)totalCount);
+			g = old_d + (int)Math.floor((double)r *  (double)elem.rightVal() / (double)totalCount ) - 1;
 
 			// dopóki warunek #1 lub warunek #2 spe³nione
-			while((d & half) == (g & half) || ((d >> (m - 2)) == 0b01 && ((g >> (m - 2)) == 0b01))) {
+			while((d & half) == (g & half) || (((d >> (m - 2)) & max) == 0b01 && (((g >> (m - 2)) & max) == 0b10))) {
 				// warunek #1
 				if ((d & half) == (g & half)) {
 					int b = (d & half) >> (m - 1); // równy MSB s³ów, do wys³ania na wyjœcie
@@ -71,8 +71,8 @@ public class BAC_decoder {
 					// g - przesuniêcie w lewo o 1 i uzupe³nienie jedynk¹
 					g = ((g << 1) | 1) & max;
 					// wczytanie nastêpnego bitu ze strumienia w miejsce MSB
-					t  = ((t<<1) & max) + s[k];
-					k++;
+					t  = ((t<<1) & max) + fileReader.get();
+
 				}
 				// warunek #2
 				if ((d >> (m - 2)) == 0b01 && ((g >> (m - 2)) == 0b10)) {
@@ -80,16 +80,25 @@ public class BAC_decoder {
 					//znacz¹cych i uzupe³nij rejestry d i g w lewo: d 0 na LSB, g 1 na LSB
 					d = ((d << 1) & (max >> 1)) | (d & (half));
 					g = (((g << 1) | 1) & (max >> 1)) | (g & (half));
+					int newbit = 0;
+					if(!fileReader.eof())
+						newbit = fileReader.get();
+					else {
+						System.out.println("Zakoñczono kodowanie bo EOF");
+						return s;
+					}
+
 					// s³owo t w lewo o 1 bit i wczytaj nastêpny bit ze strumienia wejœciowego na LSB
-					t = ((t << 1) & max) + s[k];
-					k++;
+					t = (((t << 1) & max) | (t & half)) + newbit;
+
 					// complement (new) MSB of g, d, t
 					// TODO
 				}
 			}
 		}
+		System.out.println("ITERACJE "+count);
 
-		return s;
+		return wyjscie.toArray(Integer[]::new);
 	}
 	
 	public static void decodeFromFileToFile(String inFileName,String outFileName) {
@@ -110,9 +119,27 @@ public class BAC_decoder {
 		int width=fileReader.getWidth();
 		int height=fileReader.getHeight();
 		System.out.println("Odczytane wymiary: " + width + "x"+height);
-		int dataSize = fileReader.getDataSize();
-		// TODO alphabetIntervals na podstawie fileReader
-		decode(fileReader.getData(),fileReader);
+
+		try {
+			Integer[] result = decode(fileReader.getData(), fileReader);
+			System.out.println("ZDEKODOWANE " + result.length + ": " + result);
+
+			int[][] array = new int[fileReader.getWidth()][fileReader.getHeight()];
+
+			for(int i=0; i<result.length; i++){
+				if(result[i] < 0 || result[i] > 255)
+					throw(new IOException("Nieprawido³owa wartoœæ!"));
+				array[i/fileReader.getWidth()][i%fileReader.getWidth()] = result[i];
+			}
+
+			PGMFileWriter outFile = new PGMFileWriter();
+			outFile.write(array,new File(outFileName));
+
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.err.println("B³¹d odczytu danych z pliku!!!");
+			return;
+		}
 		// TODO zapis zdekodowanego ci¹gu do pliku
 /*
 		int image[][]=new int[width][height];

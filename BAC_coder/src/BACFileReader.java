@@ -4,12 +4,16 @@ import java.util.*;
 
 public class BACFileReader {
     private int dataSize;
+    final int bitsPerWord = 8;
+    final int max = 255;
     private List<Integer> data;
     public BACFileReader(String _fileName) throws IOException {
+        _get_index = 0;
         alphabetIntervals = new HashMap<>();
         fileName = _fileName;
         data = new ArrayList<>();
         init(fileName);
+
     }
 
     public int getElement() throws IOException {
@@ -17,6 +21,22 @@ public class BACFileReader {
         return dis.readUnsignedByte();//ta metoda zwraca 8 bitów, wiêc dla porz¹dku zwracaamy byte
     }
 
+    // pobieranie bitów
+    public int get() throws IOException {
+        if(_get_index % bitsPerWord == 0) {
+            _input = data.get(_get_index/bitsPerWord) & max;
+        } else
+            _input = _input >>1;
+        int bit = _input & 0b1;
+        _get_index++;
+        return bit;
+    }
+    public Boolean eof() {
+        return _get_index >= data.size();
+    }
+    private int _get_index, _input;
+
+    public int getBitSize() { return dataSize*bitsPerWord; }
     public int getDataSize() { return dataSize; }
 
     public int getWidth() {
@@ -65,7 +85,7 @@ public class BACFileReader {
         for(int i = 0; i<stats[0]; ++i) {
             int symbol = stats[1 + i * 2];
             int count = stats[1 + i * 2 + 1];
-            System.out.println("Symbol: " +symbol +" x " + count);
+            // System.out.println("Symbol: " +symbol +" x " + count);
 
         }
         fillAlphabetIntervals(Arrays.copyOfRange(stats, 1, stats.length));
@@ -81,8 +101,10 @@ public class BACFileReader {
 
         skipHeader();
 
-        for(int i = 0; i<getDataSize();++i)
-            data.add(getElement());
+        for(int i = 0; i<getDataSize(); i++) {
+            int elem = (int) getElement();
+            data.add(elem);
+        }
     }
 
     private void skipHeader() throws IOException {
@@ -109,7 +131,7 @@ public class BACFileReader {
             hi += input[2 * i + 1];
             Integer symbol = input[2 * i];
             alphabetIntervals.put(symbol, new Pair<>(lo,hi));
-            System.out.println(i + " : " + lo + " --- " + hi);
+            //System.out.println(i + " : " + lo + " --- " + hi);
             values.add(symbol);
         }
     }

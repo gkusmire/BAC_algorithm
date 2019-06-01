@@ -27,11 +27,12 @@ class SimpleBACFileTest {
         AlphabetIntervals alphabetIntervals = new AlphabetIntervals(fileReader);
 
         System.out.println("Wymiary: " + BACReader.getWidth() + "x"+BACReader.getHeight());
-        System.out.println("D³ugoœæ: " + BACReader.getDataSize());
+        System.out.println("getDataSize() /getBitSize: " + BACReader.getDataSize() + " / " + BACReader.getBitSize());
 
         // wczytanie skompresowanego ci¹gu
-        for (int i = 0; i < BACReader.getDataSize(); ++i) {
-            int element=BACReader.getElement();
+        for (int i = 0; i < BACReader.getBitSize(); ++i) {
+            int element=BACReader.get();
+            System.out.print(element);
         }
 
 

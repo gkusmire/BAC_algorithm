@@ -9,7 +9,9 @@ public class BitStream {
     public BitStream() {
         length = 0;
         list = new ArrayList<>();
+        rewind();
     }
+    public void rewind() { getPos = 0; }
 
     public void put(int val) {
         // TODO tylko 0 i 1 dopuszczalne
@@ -23,6 +25,12 @@ public class BitStream {
         length++;
     }
 
+    public int get(int index) {
+        int bit = ((list.get(index/bitsPerWord) >> (index % bitsPerWord)) & 0b1);
+        getPos++;
+        return bit;
+    }
+
     public Integer[] asArray() {
         return list.toArray(Integer[]::new);
     }
@@ -31,4 +39,5 @@ public class BitStream {
     int length;
     final Integer bitsPerWord = 8;
     private ArrayList<Integer> list;
+    int getPos;
 }
