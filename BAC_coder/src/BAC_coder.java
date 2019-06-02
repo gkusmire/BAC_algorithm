@@ -27,6 +27,7 @@ public class BAC_coder {
 
 		// sprawdzenie zakresu typu liczbowego - UWAGA: r musi mieæ o 1 bit wiêcej ni¿ d i g
 		if((MAXVAL << 1) <= MAXVAL) throw(new ArithmeticException("Niewystarczaj¹ca d³ugoœæ typu liczbowego!"));
+		if(totalCount > MAXVAL) throw(new ArithmeticException("Niewystarczaj¹ca d³ugoœæ typu liczbowego!"));
 
 		for(int i=1;i<s.length;i++)
 		{
@@ -81,6 +82,18 @@ public class BAC_coder {
 		}
 		// Jeœli nie ma wiêcej symboli zakoñczenie: dopisz do wyjœcia wszystkie znacz¹ce bity z d
 		int sb = 1 << (m-1);
+		System.out.println("KOÑCZENIE KODOWANIE d="+d+", ln="+ln);
+		// wyprowadzanie ln
+		if(ln>0) {
+			while ((sb & ln) == 0 && sb>0)
+				sb >>= 1;
+			while(sb > 0) {
+				wyjscie.put((sb & ln) > 0 ? 1 : 0);
+				sb >>= 1;
+			}
+		}
+		sb = 1 << (m-1);
+		// wyprowadzanie d
 		if(d > 0) { // s¹ znacz¹ce bity
 			while ((sb & d) == 0)
 				sb >>= 1;
@@ -88,7 +101,8 @@ public class BAC_coder {
 				wyjscie.put((sb & d) > 0 ? 1 : 0);
 				sb >>= 1;
 			}
-		}
+		} else wyjscie.put(0);
+
 		// i co teras? --- dos³aæ zera do pe³nych bajtów, czy te¿ koniecznie musi byæ równie¿ podzielne przez d³ugoœæ s³owa?
         // s³owa --- nie ma b³êdów z eof
 		while(wyjscie.getLength()%8 != 0 || wyjscie.getLength()%m != 0)
