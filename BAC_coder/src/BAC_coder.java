@@ -11,7 +11,7 @@ public class BAC_coder {
 
 		// inicjalizacja
 		// ustalamy pocz¹tkowe granice przedzia³u - dla dostêpnych 2^m wartoœci po m 0 i 1 w zapisie dwójkowym
-		final int m = 24; // d³ugoœæ s³owa
+		final int m = 30; // d³ugoœæ s³owa
 		// maksymalna wartoœæ - je¿eli wybieramy sobie dowoln¹ d³ugoœæ s³owa,
 		// trzeba pamiêtaæ o zastosowaniu maski bitowej do wyniku przesuniêcia bitowego
 		final int MAXVAL = (int)Math.pow(2,m) - 1;
@@ -25,6 +25,9 @@ public class BAC_coder {
 
 		BitStream wyjscie = new BitStream();
 
+		// sprawdzenie zakresu typu liczbowego - UWAGA: r musi mieæ o 1 bit wiêcej ni¿ d i g
+		if((MAXVAL << 1) <= MAXVAL) throw(new ArithmeticException("Niewystarczaj¹ca d³ugoœæ typu liczbowego!"));
+
 		for(int i=1;i<s.length;i++)
 		{
 			int r = g - d + 1; // obliczamy szerokoœæ przedzia³u
@@ -35,8 +38,8 @@ public class BAC_coder {
 			int old_d = d;
 			Pair<Integer, Integer> ai = alphabetIntervals.getAlphabetElementInterval(s[i]);
 
-			d = old_d + (int)Math.floor((double)r * (double)ai.leftVal()/(double)totalCount);//D = D + R · N[k-1]/N
-			g = old_d + (int)Math.floor((double)r * (double)ai.rightVal()/(double)totalCount) - 1;//G = D + R · N[k]/N - 1
+			d = old_d + (int)Math.floor((double)r * ((double)ai.leftVal()/(double)totalCount));//D = D + R · N[k-1]/N
+			g = old_d + (int)Math.floor((double)r * ((double)ai.rightVal()/(double)totalCount)) - 1;//G = D + R · N[k]/N - 1
 
             if(d > g) throw(new ArithmeticException("d>g! Za ma³a dok³adnoœæ numeryczna!"));
 
@@ -44,8 +47,7 @@ public class BAC_coder {
 			while(((d & half) == (g & half)) || ((d & half) < (g & half) && (d & quat) > (g & quat) )) {
 				// warunek #1 - Jeœli b <- MSB w d i g jest jednakowy:
 				if ((d & half) == (g & half)) {
-					int bb = (d & half) >> (m - 1); // równy MSB s³ów, do wys³ania na wyjœcie
-					int b = bb>0 ? 1 : 0;
+					int b = (d & half) > 0 ? 1 : 0; // równy MSB s³ów, do wys³ania na wyjœcie
 					// d - przesuniêcie w lewo o 1 i (implicite) uzupe³nienie zerem
 					d = (d << 1) & MAXVAL;
 					// g - przesuniêcie w lewo o 1 i uzupe³nienie jedynk¹
@@ -58,14 +60,12 @@ public class BAC_coder {
 						wyjscie.put(1 - b);
 						ln--;
 					}
-				}
-
-                // warunek #2
-				// wyk³ad: Jeœli D = 0x01... a G = 0x10...: --- rozumiem, ¿e jest to zapis w systemie binarnym (!)
-				// Sayood: warunek E_3 tj. nastêpuj¹ce mapowanie zwiêkszaj¹ce dwukrotnie szerokoœæ przedzia³u:
-				// [0.25, 0.75) -> [0,1), E_3(x) = 2(x - 0.25)
-				// trzeba to prze³o¿yæ na implementacjê binarn¹ ca³kowitoliczbow¹
-				if ((d & half) < (g & half) && (d & quat) > (g & quat) ) {
+				} else {
+				// warunek #2
+					// wyk³ad: Jeœli D = 0x01... a G = 0x10...: --- rozumiem, ¿e jest to zapis w systemie binarnym (!)
+					// Sayood: warunek E_3 tj. nastêpuj¹ce mapowanie zwiêkszaj¹ce dwukrotnie szerokoœæ przedzia³u:
+					// [0.25, 0.75) -> [0,1), E_3(x) = 2(x - 0.25)
+					// trzeba to prze³o¿yæ na implementacjê binarn¹ ca³kowitoliczbow¹
 					//przesuñ w lewo bity obu rejestrów z wyj¹tkiem najbardziej
 					//znacz¹cych i uzupe³nij rejestry; LN = LN + 1
 					// d w lewo i 0 na LSB
@@ -75,7 +75,6 @@ public class BAC_coder {
 					d = ((d << 1) & (MAXVAL >> 1)) | (d & (half));
 					// g w lewo i 1 na LSB
 					g = (((g << 1) | 1) & (MAXVAL >> 1)) | (g & (half));
-
 					ln++;
 				}
             }
@@ -90,12 +89,12 @@ public class BAC_coder {
 				sb >>= 1;
 			}
 		}
-		// i co teras? --- dos³aæ zera do pe³nych s³ów
+		// i co teras? --- dos³aæ zera do pe³nych bajtów, czy te¿ koniecznie musi byæ równie¿ podzielne przez d³ugoœæ s³owa?
 		while(wyjscie.getLength()%8 != 0)
 		{
 			wyjscie.put(0);
 		}
-		System.out.println("Wyprowadzono " + wyjscie.getLength() + " bitów / " + wyjscie.asArray().length + " bajtów.");
+		System.out.println("KODER: wyprowadzono " + wyjscie.getLength() + " bitów / " + wyjscie.asArray().length + " bajtów. m="+m);
 		return wyjscie.asArray();
 	}
 	

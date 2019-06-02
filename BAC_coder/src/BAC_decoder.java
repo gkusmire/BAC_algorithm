@@ -22,7 +22,7 @@ public class BAC_decoder {
 
 		// inicjalizacja
 		// ustalamy pocz¹tkowe granice przedzia³u - dla dostêpnych 2^m wartoœci po m 0 i 1 w zapisie dwójkowym
-		final int m = 24; // d³ugoœæ s³owa
+		final int m = 30; // d³ugoœæ s³owa
 		// maksymalna wartoœæ - je¿eli wybieramy sobie dowoln¹ d³ugoœæ s³owa,
 		// trzeba pamiêtaæ o zastosowaniu maski bitowej do wyniku przesuniêcia bitowego
 		final int max = (int)Math.pow(2,m) - 1;
@@ -40,6 +40,7 @@ public class BAC_decoder {
 
 		fileReader.rewind();
 		// wczytanie m bitów z wejœcia do s³owa t
+		// UWAGA: kolejnoœæ wczytywania bitów
 		for(int i = 0; i<m && !fileReader.eof();++i) {
 			t = (t<<1) + fileReader.get();
 		}
@@ -60,8 +61,8 @@ public class BAC_decoder {
 			int r = g - d + 1; // obliczamy szerokoœæ przedzia³u
 			int old_d = d;
 			Pair<Integer, Integer> elem = fileReader.getAlphabetElementInterval(x); // zakres wystêpowania symbolu x
-			d = old_d + (int)Math.floor((double)r *  (double)elem.leftVal() / (double)totalCount);
-			g = old_d + (int)Math.floor((double)r *  (double)elem.rightVal() / (double)totalCount ) - 1;
+			d = old_d + (int)Math.floor((double)r * ((double)elem.leftVal() / (double)totalCount));
+			g = old_d + (int)Math.floor((double)r * ((double)elem.rightVal() / (double)totalCount)) - 1;
 			if(d > g) throw(new ArithmeticException("d>g! Za ma³a dok³adnoœæ numeryczna!"));
 
 			// dopóki warunek #1 lub warunek #2 spe³nione
@@ -74,6 +75,7 @@ public class BAC_decoder {
 					// g - przesuniêcie w lewo o 1 i uzupe³nienie jedynk¹
 					g = ((g << 1) | 1) & max;
 					// wczytanie nastêpnego bitu ze strumienia w miejsce MSB
+					if(fileReader.eof() ) break;
 					t  = ((t<<1) & max) + fileReader.get();
 
 				}
@@ -84,6 +86,7 @@ public class BAC_decoder {
 					d = ((d << 1) & (max >> 1)) | (d & (half));
 					g = (((g << 1) | 1) & (max >> 1)) | (g & (half));
 					int newbit = 0;
+					if(!fileReader.eof() )
 					newbit = fileReader.get();
 
 					// s³owo t w lewo o 1 bit i wczytaj nastêpny bit ze strumienia wejœciowego na LSB
