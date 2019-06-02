@@ -75,7 +75,7 @@ public class BAC_decoder {
 					// g - przesuniêcie w lewo o 1 i uzupe³nienie jedynk¹
 					g = ((g << 1) | 1) & max;
 					// wczytanie nastêpnego bitu ze strumienia w miejsce MSB
-					if(fileReader.eof() ) break;
+					//if(fileReader.eof() ) break;
 					t  = ((t<<1) & max) + fileReader.get();
 
 				}
@@ -86,7 +86,7 @@ public class BAC_decoder {
 					d = ((d << 1) & (max >> 1)) | (d & (half));
 					g = (((g << 1) | 1) & (max >> 1)) | (g & (half));
 					int newbit = 0;
-					if(!fileReader.eof() )
+					//if(!fileReader.eof() )
 					newbit = fileReader.get();
 
 					// s³owo t w lewo o 1 bit i wczytaj nastêpny bit ze strumienia wejœciowego na LSB

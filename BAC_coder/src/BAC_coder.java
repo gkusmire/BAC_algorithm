@@ -90,7 +90,8 @@ public class BAC_coder {
 			}
 		}
 		// i co teras? --- dos³aæ zera do pe³nych bajtów, czy te¿ koniecznie musi byæ równie¿ podzielne przez d³ugoœæ s³owa?
-		while(wyjscie.getLength()%8 != 0)
+        // s³owa --- nie ma b³êdów z eof
+		while(wyjscie.getLength()%8 != 0 || wyjscie.getLength()%m != 0)
 		{
 			wyjscie.put(0);
 		}
