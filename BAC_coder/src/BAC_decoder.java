@@ -45,8 +45,12 @@ public class BAC_decoder {
 			t = (t<<1) + fileReader.get();
 		}
 
-		//
 		int count = 0;
+		// TODO naprawiæ dekodowanie pierwszego znaku
+		// dodanie znaku dla wyrównania zjadanego pocz¹tkowego i umo¿liwienia testów
+		wyjscie.add(fileReader.getNthSymbol(0));
+		count++;
+
 		while(!fileReader.eof() && count < totalCount) { // dopóki s¹ symbole
 			int k = 0; // indeks dekodowanego symbolu
 			while(k < fileReader.getNumber()-1 &&(int) Math.floor(((float)(t - d + 1) * (float)totalCount - 1) / (float)(g - d + 1)) >= fileReader.getAlphabetElementInterval(fileReader.getNthSymbol(k)).rightVal()) // leftVal bo od pocz¹tku

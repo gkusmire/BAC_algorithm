@@ -20,27 +20,31 @@ class SimpleCodeAndDecodeTest {
 		AlphabetIntervals alphabetIntervals = new AlphabetIntervals(fileReader);
 
 		BAC_decoder.decodeFromFileToFile(s2, s3);
-		byte[] f1 = Files.readAllBytes(Path.of(s1));
-		byte[] ft = Files.readAllBytes(Path.of(s2));
-		byte[] f2 = Files.readAllBytes(Path.of(s3));
+
 		double d=0;
 		double mean_distance=0;
 		String s="";
-		/*
-		for(int i=0;i<f1.length;i++) {
-			if(f1[i]!=f2[i])
+
+		PGMFileReader testIn, testOut;
+		testIn = new PGMFileReader(s1);
+		testOut = new PGMFileReader(s3);
+		int dataSize = alphabetIntervals.getFileContent().length;
+		for(int i=0;i<dataSize;i++) {
+			int inVal = testIn.getElement();
+			int outVal = testOut.getElement();
+			if(inVal != outVal)
 			{
 				d++;
-				s+=i+":"+f1[i]+"->"+f2[i]+",";
+				s+=i+":"+inVal+"->"+outVal+",";
 			}
-			mean_distance+=f1[i]-f2[i];
+			mean_distance+=(inVal - outVal);
 		}
-		//odczyt zapis wymaga poprawienia, bo czasem przekrêca wartoœci
-		// za bardzo obci¹¿a//System.out.println(s);
+		// (?) odczyt zapis wymaga poprawienia, bo czasem przekrêca wartoœci
+		System.out.println(s);
 		System.out.println("d="+d);
-		System.out.println("Stopieñ zgodnoœci: "+((f1.length-d)/f1.length));
-		System.out.println("Œrednia ró¿nica wartoœci: "+(mean_distance/f1.length));
-		*/
+		System.out.println("Stopieñ zgodnoœci: "+((dataSize-d)/dataSize));
+		System.out.println("Œrednia ró¿nica wartoœci: "+(mean_distance/dataSize));
+
 		//assertTrue(Arrays.equals(f1, f2));
 
 		BACFileReader bReader = new BACFileReader(s2);
