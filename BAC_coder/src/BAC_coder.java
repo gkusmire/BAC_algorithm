@@ -11,7 +11,7 @@ public class BAC_coder {
 
 		// inicjalizacja
 		// ustalamy pocz¹tkowe granice przedzia³u - dla dostêpnych 2^m wartoœci po m 0 i 1 w zapisie dwójkowym
-		final int m = 28; // d³ugoœæ s³owa
+		final int m = 24; // d³ugoœæ s³owa
 		// maksymalna wartoœæ - je¿eli wybieramy sobie dowoln¹ d³ugoœæ s³owa,
 		// trzeba pamiêtaæ o zastosowaniu maski bitowej do wyniku przesuniêcia bitowego
 		final int MAXVAL = (int)Math.pow(2,m) - 1;
@@ -52,12 +52,10 @@ public class BAC_coder {
 					g = ((g << 1) | 1) & MAXVAL;
 					//WYS£ANIE b
 					wyjscie.put(b);
-					System.out.print((b) > 0 ? "L" : "o");
 					// jeœli licznik LN > 0, wyœlij LN bitów (1 - b ); LN = 0, --- tj. (1 - b) jako realizacja negacji jednobitowej wartoœci
 					// Sayood: while(Scale3 > 0)
 					while (ln > 0) {
 						wyjscie.put(1 - b);
-						System.out.print(1-b > 0 ? "L" : "o");
 						ln--;
 					}
 				}
@@ -89,7 +87,6 @@ public class BAC_coder {
 				sb >>= 1;
 			while (sb > 0) {
 				wyjscie.put((sb & d) > 0 ? 1 : 0);
-				System.out.print((sb & d) > 0 ? "L" : "o");
 				sb >>= 1;
 			}
 		}
@@ -97,7 +94,6 @@ public class BAC_coder {
 		while(wyjscie.getLength()%8 != 0)
 		{
 			wyjscie.put(0);
-			System.out.print("o");
 		}
 		System.out.println("Wyprowadzono " + wyjscie.getLength() + " bitów / " + wyjscie.asArray().length + " bajtów.");
 		return wyjscie.asArray();
@@ -116,7 +112,7 @@ public class BAC_coder {
 			fileReader = new PGMFileReader(inFileName);
 			fileWriter = new BACFileWriter();
 			AlphabetIntervals alphabetIntervals = new AlphabetIntervals(fileReader);//TODO: s³abo, ¿e budowanie struktury nie jest oddzielone od czytania pliku
-			alphabetIntervals.printAlphabetIntervals();//tu bierzemy zwartoœæ ca³ego pliku
+			//alphabetIntervals.printAlphabetIntervals();//tu bierzemy zwartoœæ ca³ego pliku
 			output=code(alphabetIntervals);//wiêc tu te¿ kodujemy zawartoœæ ca³ego pliku
 			/*
 			FileOutputStream fos = new FileOutputStream(outFileName);

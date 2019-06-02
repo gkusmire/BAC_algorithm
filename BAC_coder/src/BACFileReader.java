@@ -23,6 +23,8 @@ public class BACFileReader {
 
     // pobieranie bitów
     public int get() throws IOException {
+        if(_get_index/bitsPerWord >= data.size())
+            throw(new IOException("Przekroczono rozmiar danych!"));
         if(_get_index % bitsPerWord == 0) {
             _input = data.get(_get_index/bitsPerWord) & max;
         } else
@@ -32,8 +34,9 @@ public class BACFileReader {
         return bit;
     }
     public Boolean eof() {
-        return _get_index >= data.size();
+        return _get_index*bitsPerWord >= data.size();
     }
+    public void rewind() { _get_index = 0; }
     private int _get_index, _input;
 
     public int getBitSize() { return dataSize*bitsPerWord; }
