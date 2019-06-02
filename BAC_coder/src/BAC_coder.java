@@ -11,17 +11,21 @@ public class BAC_coder {
 
 		// inicjalizacja
 		// ustalamy pocz¹tkowe granice przedzia³u - dla dostêpnych 2^m wartoœci po m 0 i 1 w zapisie dwójkowym
-		final int m = 24; // d³ugoœæ s³owa
+		final int m = 30; // d³ugoœæ s³owa
 		// maksymalna wartoœæ - je¿eli wybieramy sobie dowoln¹ d³ugoœæ s³owa,
 		// trzeba pamiêtaæ o zastosowaniu maski bitowej do wyniku przesuniêcia bitowego
-		final int MAXVAL = (int)Math.pow(2,m) - 1;
-		final int half = 0b1 << (m-1); // w praktyce: maska dla najstarszego bitu s³owa
-		final int quat = 0b1 << (m-2);// w praktyce: maska dla drugiego najstarszego bitu s³owa
+		long _max = 0;
+		for(int i = 0; i < m; i++)
+			_max = (_max<<1) | 1;
+		System.out.println((_max));
+		final long MAXVAL = _max;
+		final long half = 0b1 << (m-1); // w praktyce: maska dla najstarszego bitu s³owa
+		final long quat = 0b1 << (m-2);// w praktyce: maska dla drugiego najstarszego bitu s³owa
 
-		int d = 0; // ustalamy doln¹ granicê na (0...0)
-		int g = MAXVAL; // ustalamy górn¹ granicê na (1...1)
-		int ln=0; // licznik niedomiaru; Sayood: Scale3
-		final int totalCount = s.length;
+		long d = 0; // ustalamy doln¹ granicê na (0...0)
+		long g = MAXVAL; // ustalamy górn¹ granicê na (1...1)
+		long ln=0; // licznik niedomiaru; Sayood: Scale3
+		final long totalCount = s.length;
 
 		BitStream wyjscie = new BitStream();
 
@@ -29,18 +33,18 @@ public class BAC_coder {
 		if((MAXVAL << 1) <= MAXVAL) throw(new ArithmeticException("Niewystarczaj¹ca d³ugoœæ typu liczbowego!"));
 		if(totalCount > MAXVAL) throw(new ArithmeticException("Niewystarczaj¹ca d³ugoœæ typu liczbowego!"));
 
-		for(int i=0;i<s.length;i++)
+		for(int i=0;i<totalCount;i++)
 		{
 			long r = g - d + 1; // obliczamy szerokoœæ przedzia³u
 
 			// N(k) to suma liczby wyst¹pieñ symboli 1..k
 			// N - ca³kowita liczba symboli w kodowanym ci¹gu
 			// pobranie kolejnego symbolu s[i]
-			int old_d = d;
+			long old_d = d;
 			Pair<Integer, Integer> ai = alphabetIntervals.getAlphabetElementInterval(s[i]);
 
-			d = old_d + (int)((r * ai.leftVal())/totalCount);//D = D + R · N[k-1]/N
-			g = old_d + (int)((r * ai.rightVal())/totalCount) - 1;//G = D + R · N[k]/N - 1
+			d = old_d + (r * ai.leftVal())/totalCount;//D = D + R · N[k-1]/N
+			g = old_d + (r * ai.rightVal())/totalCount - 1;//G = D + R · N[k]/N - 1
 
             if(d > g) throw(new ArithmeticException("d>g! Za ma³a dok³adnoœæ numeryczna!"));
 
@@ -78,7 +82,7 @@ public class BAC_coder {
 
 		int i = 0;
 		for(;i<ln;i++) {
-			wyjscie.put(d&half);
+			wyjscie.put((d&half) > 0 ? 1 : 0);
 			d<<=1;
 		}
 		while(ln>0) {
@@ -86,7 +90,7 @@ public class BAC_coder {
 			ln--;
 		}
 		for(;i<m;i++) {
-			wyjscie.put(d&half);
+			wyjscie.put((d&half) > 0 ? 1 : 0);
 			d<<=1;
 		}
 		/*

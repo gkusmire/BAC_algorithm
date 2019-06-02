@@ -13,22 +13,22 @@ public class BAC_decoder {
 		// dla wyjaœnienia algorytmu nale¿y zapoznaæ siê najpierw z algorytmem kodera
 		// dzia³a na analogicznej zasadzie
 		// d³ugoœæ oryginalnego ci¹gu
-		int totalCount = fileReader.getWidth() * fileReader.getHeight();
+		long totalCount = fileReader.getWidth() * fileReader.getHeight();
 
 		// inicjalizacja
 		// ustalamy pocz¹tkowe granice przedzia³u - dla dostêpnych 2^m wartoœci po m 0 i 1 w zapisie dwójkowym
         // TODO powi¹zanie z m kodera - czy konieczne?
-		final int m = 24; // d³ugoœæ s³owa
+		final int m = 30; // d³ugoœæ s³owa
 		// maksymalna wartoœæ - je¿eli wybieramy sobie dowoln¹ d³ugoœæ s³owa,
 		// trzeba pamiêtaæ o zastosowaniu maski bitowej do wyniku przesuniêcia bitowego
-		final int max = (int)Math.pow(2,m) - 1;
-		final int half = 0b1 << (m-1);
-		final int quat = 0b1 << (m-2);
+		final long max = (int)Math.pow(2,m) - 1;
+		final long half = 0b1 << (m-1);
+		final long quat = 0b1 << (m-2);
 
-		int d = 0;   // ustalamy doln¹ granicê na (0...0)
-		int g = max; // ustalamy górn¹ granicê na (1...1)
+		long d = 0;   // ustalamy doln¹ granicê na (0...0)
+		long g = max; // ustalamy górn¹ granicê na (1...1)
 
-		int t = 0b0; // dekodowane s³owo (?)
+		long t = 0b0; // dekodowane s³owo (?)
 
 		List<Integer> wyjscie = new ArrayList<>();
 
@@ -42,37 +42,40 @@ public class BAC_decoder {
 
 		int count = 0;
 
-		while(count < totalCount) { // dopóki s¹ symbole
+		while(!fileReader.eof() && count < totalCount) { // dopóki s¹ symbole
 			int k = 0; // indeks dekodowanego symbolu
 			long r = g - d + 1; // obliczamy szerokoœæ przedzia³u
 
-			while((int) Math.floor(((float)(t - d + 1) * (float)totalCount - 1) / r) >= fileReader.getAlphabetElementInterval(fileReader.getNthSymbol(k)).rightVal()) // leftVal bo od pocz¹tku
+			while(k < fileReader.getNumber() && Math.floor(((float)(t - d + 1) * (float)totalCount - 1) / r) >= fileReader.getAlphabetElementInterval(fileReader.getNthSymbol(k)).rightVal()) // leftVal bo od pocz¹tku
 				k++;
+			k = Math.min(k,fileReader.getNumber()-1);
             if(k >= fileReader.getNumber()) throw new ArrayIndexOutOfBoundsException("Nie ma takiego symbolu!");
 			// zdekoduj symbol x k-ty z linii prawdopodobieñstw
 			int x = fileReader.getNthSymbol(k);
 			wyjscie.add(x);
 			count++;
 
-			int old_d = d;
+			long old_d = d;
 			Pair<Integer, Integer> elem = fileReader.getAlphabetElementInterval(x); // zakres wystêpowania symbolu x
 			//d = old_d + (int)Math.floor((double)r * ((double)elem.leftVal() / (double)totalCount));
 			//g = old_d + (int)Math.floor((double)r * ((double)elem.rightVal() / (double)totalCount)) - 1;
-			d = old_d + (int)((r * elem.leftVal())/totalCount);
-			g = old_d + (int)((r * elem.rightVal())/totalCount) - 1;
+			d = old_d + (r * elem.leftVal())/totalCount;
+			g = old_d + (r * elem.rightVal())/totalCount - 1;
 			if(d > g) throw(new ArithmeticException("d>g! Za ma³a dok³adnoœæ numeryczna!"));
 
 			// dopóki warunek #1 lub warunek #2 spe³nione
 			while( ( (d & half) == (g & half) || (((d >> (m - 2)) & 0b11) == 0b01 && (((g >> (m - 2)) & 0b11) == 0b10))) ) {
 				// warunek #1
 				if ((d & half) == (g & half)) {
-					int b = (d & half) >> (m - 1); // równy MSB s³ów, do wys³ania na wyjœcie
+					long b = (d & half) >> (m - 1); // równy MSB s³ów, do wys³ania na wyjœcie
 					// d - przesuniêcie w lewo o 1 i (implicite) uzupe³nienie zerem
 					d = (d << 1) & max;
 					// g - przesuniêcie w lewo o 1 i uzupe³nienie jedynk¹
 					g = ((g << 1) | 1) & max;
 					// wczytanie nastêpnego bitu ze strumienia w miejsce MSB
-					t  = ((t<<1) & max) + fileReader.get();
+					int val = 0;
+					if(!fileReader.eof()) val = fileReader.get();
+					t  = ((t<<1) & max) + val;
 
 				}
 				// warunek #2
@@ -83,7 +86,9 @@ public class BAC_decoder {
 					d = ((d << 1) & (max >> 1)) | (d & (half));
 					g = (((g << 1) | 1) & (max >> 1)) | (g & (half));
 					// j.w. i wczytaj nastêpny bit ze strumienia wejœciowego na LSB
-					t = (((t << 1) & (max>>1)) | (t & half)) + fileReader.get();
+					int val = 0;
+					if(!fileReader.eof()) val = fileReader.get();
+					t = (((t << 1) & (max>>1)) | (t & half)) + val;
 				}
 			}
 		}
