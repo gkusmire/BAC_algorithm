@@ -18,7 +18,7 @@ public class BAC_decoder {
 		// inicjalizacja
 		// ustalamy pocz¹tkowe granice przedzia³u - dla dostêpnych 2^m wartoœci po m 0 i 1 w zapisie dwójkowym
         // TODO powi¹zanie z m kodera - czy konieczne?
-		final int m = 30; // d³ugoœæ s³owa
+		final int m = 24; // d³ugoœæ s³owa
 		// maksymalna wartoœæ - je¿eli wybieramy sobie dowoln¹ d³ugoœæ s³owa,
 		// trzeba pamiêtaæ o zastosowaniu maski bitowej do wyniku przesuniêcia bitowego
 		final long max = (int)Math.pow(2,m) - 1;
@@ -46,7 +46,7 @@ public class BAC_decoder {
 			int k = 0; // indeks dekodowanego symbolu
 			long r = g - d + 1; // obliczamy szerokoœæ przedzia³u
 
-			while(k < fileReader.getNumber() && Math.floor(((float)(t - d + 1) * (float)totalCount - 1) / r) >= fileReader.getAlphabetElementInterval(fileReader.getNthSymbol(k)).rightVal()) // leftVal bo od pocz¹tku
+			while(k < fileReader.getNumber() && Math.floor(((double)(t - d + 1) * totalCount - 1) / r) >= fileReader.getAlphabetElementInterval(fileReader.getNthSymbol(k)).rightVal()) // leftVal bo od pocz¹tku
 				k++;
 			k = Math.min(k,fileReader.getNumber()-1);
             if(k >= fileReader.getNumber()) throw new ArrayIndexOutOfBoundsException("Nie ma takiego symbolu!");
