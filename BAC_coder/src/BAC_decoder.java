@@ -38,18 +38,15 @@ public class BAC_decoder {
 		for(int i = 0; i < m; i++) {
 			t = (t<<1) | fileReader.get();
 		}
+		System.out.println("Pierwsze s³owo = "+t);
 
 		int count = 0;
-		// TODO naprawiæ dekodowanie pierwszego znaku
-		// dodanie znaku dla wyrównania zjadanego pocz¹tkowego i umo¿liwienia testów
-		wyjscie.add(fileReader.getNthSymbol(0));
-		count++;
 
 		while(count < totalCount) { // dopóki s¹ symbole
 			int k = 0; // indeks dekodowanego symbolu
-			int r = g - d + 1; // obliczamy szerokoœæ przedzia³u
+			long r = g - d + 1; // obliczamy szerokoœæ przedzia³u
 
-			while((int) Math.floor(((float)(t - d + 1) * (float)totalCount - 1) / (float)r) >= fileReader.getAlphabetElementInterval(fileReader.getNthSymbol(k)).rightVal()) // leftVal bo od pocz¹tku
+			while((int) Math.floor(((float)(t - d + 1) * (float)totalCount - 1) / r) >= fileReader.getAlphabetElementInterval(fileReader.getNthSymbol(k)).rightVal()) // leftVal bo od pocz¹tku
 				k++;
             if(k >= fileReader.getNumber()) throw new ArrayIndexOutOfBoundsException("Nie ma takiego symbolu!");
 			// zdekoduj symbol x k-ty z linii prawdopodobieñstw
@@ -59,8 +56,10 @@ public class BAC_decoder {
 
 			int old_d = d;
 			Pair<Integer, Integer> elem = fileReader.getAlphabetElementInterval(x); // zakres wystêpowania symbolu x
-			d = old_d + (int)Math.floor((double)r * ((double)elem.leftVal() / (double)totalCount));
-			g = old_d + (int)Math.floor((double)r * ((double)elem.rightVal() / (double)totalCount)) - 1;
+			//d = old_d + (int)Math.floor((double)r * ((double)elem.leftVal() / (double)totalCount));
+			//g = old_d + (int)Math.floor((double)r * ((double)elem.rightVal() / (double)totalCount)) - 1;
+			d = old_d + (int)((r * elem.leftVal())/totalCount);
+			g = old_d + (int)((r * elem.rightVal())/totalCount) - 1;
 			if(d > g) throw(new ArithmeticException("d>g! Za ma³a dok³adnoœæ numeryczna!"));
 
 			// dopóki warunek #1 lub warunek #2 spe³nione
@@ -99,9 +98,8 @@ public class BAC_decoder {
 		File inFile = new File(inFileName);
 		StringBuilder sb=new StringBuilder();
 		BACFileReader fileReader;
-		byte bytes[];
+
 		try {
-			bytes=Files.readAllBytes(Path.of(inFileName));
 			 fileReader = new BACFileReader("test.bac");
 		} catch (IOException e) {
 			e.printStackTrace();

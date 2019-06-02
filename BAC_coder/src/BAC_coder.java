@@ -20,7 +20,7 @@ public class BAC_coder {
 
 		int d = 0; // ustalamy doln¹ granicê na (0...0)
 		int g = MAXVAL; // ustalamy górn¹ granicê na (1...1)
-		int ln=0; // licznik niedomiaru
+		int ln=0; // licznik niedomiaru; Sayood: Scale3
 		final int totalCount = s.length;
 
 		BitStream wyjscie = new BitStream();
@@ -29,9 +29,9 @@ public class BAC_coder {
 		if((MAXVAL << 1) <= MAXVAL) throw(new ArithmeticException("Niewystarczaj¹ca d³ugoœæ typu liczbowego!"));
 		if(totalCount > MAXVAL) throw(new ArithmeticException("Niewystarczaj¹ca d³ugoœæ typu liczbowego!"));
 
-		for(int i=1;i<s.length;i++)
+		for(int i=0;i<s.length;i++)
 		{
-			int r = g - d + 1; // obliczamy szerokoœæ przedzia³u
+			long r = g - d + 1; // obliczamy szerokoœæ przedzia³u
 
 			// N(k) to suma liczby wyst¹pieñ symboli 1..k
 			// N - ca³kowita liczba symboli w kodowanym ci¹gu
@@ -39,8 +39,8 @@ public class BAC_coder {
 			int old_d = d;
 			Pair<Integer, Integer> ai = alphabetIntervals.getAlphabetElementInterval(s[i]);
 
-			d = old_d + (int)Math.floor((double)r * ((double)ai.leftVal()/(double)totalCount));//D = D + R · N[k-1]/N
-			g = old_d + (int)Math.floor((double)r * ((double)ai.rightVal()/(double)totalCount)) - 1;//G = D + R · N[k]/N - 1
+			d = old_d + (int)((r * ai.leftVal())/totalCount);//D = D + R · N[k-1]/N
+			g = old_d + (int)((r * ai.rightVal())/totalCount) - 1;//G = D + R · N[k]/N - 1
 
             if(d > g) throw(new ArithmeticException("d>g! Za ma³a dok³adnoœæ numeryczna!"));
 
@@ -55,24 +55,15 @@ public class BAC_coder {
 					g = ((g << 1) | 1) & MAXVAL;
 					//WYS£ANIE b
 					wyjscie.put(b);
-					// jeœli licznik LN > 0, wyœlij LN bitów (1 - b ); LN = 0, --- tj. (1 - b) jako realizacja negacji jednobitowej wartoœci
-					// Sayood: while(Scale3 > 0)
+					// jeœli licznik LN > 0, wyœlij LN bitów (1 - b)
 					while (ln > 0) {
 						wyjscie.put(1 - b);
 						ln--;
 					}
 				} else {
-				// warunek #2
-					// wyk³ad: Jeœli D = 0x01... a G = 0x10...: --- rozumiem, ¿e jest to zapis w systemie binarnym (!)
-					// Sayood: warunek E_3 tj. nastêpuj¹ce mapowanie zwiêkszaj¹ce dwukrotnie szerokoœæ przedzia³u:
-					// [0.25, 0.75) -> [0,1), E_3(x) = 2(x - 0.25)
-					// trzeba to prze³o¿yæ na implementacjê binarn¹ ca³kowitoliczbow¹
-					//przesuñ w lewo bity obu rejestrów z wyj¹tkiem najbardziej
-					//znacz¹cych i uzupe³nij rejestry; LN = LN + 1
+				// warunek #2 d=0b01... i g=0b10...
+                    // przesuñ w lewo bity obu rejestrów z wyj¹tkiem najbardziej znacz¹cych, uzupe³nij rejestry
 					// d w lewo i 0 na LSB
-					// czy tak wygl¹da "przesuniêcie w lewo z wyj¹tkiem MSB"?
-					// complement (new) MSB of d and g --- czyli zgadza siê z wyk³adem
-					// realizacja tutaj: przesuniêcie w lewo ale zamaskowanie (nowego) MSB i alternatywa ze starym MSB
 					d = ((d << 1) & (MAXVAL >> 1)) | (d & (half));
 					// g w lewo i 1 na LSB
 					g = (((g << 1) | 1) & (MAXVAL >> 1)) | (g & (half));
@@ -84,25 +75,54 @@ public class BAC_coder {
 		int sb = 1 << (m-1);
 		System.out.println("KOÑCZENIE KODOWANIE d="+d+", ln="+ln);
 		// wyprowadzanie ln
+
+		int i = 0;
+		for(;i<ln;i++) {
+			wyjscie.put(d&half);
+			d<<=1;
+		}
+		while(ln>0) {
+			wyjscie.put(1);
+			ln--;
+		}
+		for(;i<m;i++) {
+			wyjscie.put(d&half);
+			d<<=1;
+		}
+		/*
+		while (ln > 0) {
+			int val = 1 - ((d&half) > 0 ? 1 : 0);
+			System.out.print(val);
+			wyjscie.put(val);
+			ln--;
+		}
+		/*
 		if(ln>0) {
 			while ((sb & ln) == 0 && sb>0)
 				sb >>= 1;
 			while(sb > 0) {
-				wyjscie.put((sb & ln) > 0 ? 1 : 0);
+				int val = (sb & ln) > 0 ? 1 : 0;
+				System.out.print(val);
+				wyjscie.put(val);
 				sb >>= 1;
 			}
 		}
+
+		System.out.println("; ");
 		sb = 1 << (m-1);
 		// wyprowadzanie d
 		if(d > 0) { // s¹ znacz¹ce bity
-			while ((sb & d) == 0)
-				sb >>= 1;
+			//while ((sb & d) == 0)
+			//	sb >>= 1;
 			while (sb > 0) {
-				wyjscie.put((sb & d) > 0 ? 1 : 0);
+				int val = (sb & d) > 0 ? 1 : 0;
+				System.out.print(val);
+				wyjscie.put(val);
 				sb >>= 1;
 			}
 		} else wyjscie.put(0);
-
+		System.out.println(" ");
+*/
 		// i co teras? --- dos³aæ zera do pe³nych bajtów, czy te¿ koniecznie musi byæ równie¿ podzielne przez d³ugoœæ s³owa?
         // s³owa --- nie ma b³êdów z eof
 		while(wyjscie.getLength()%8 != 0 || wyjscie.getLength()%m != 0)
@@ -115,7 +135,7 @@ public class BAC_coder {
 	
 	/**
 	 * Metoda odczyta plik wejœciowy, zakoduje go i zapisze
-	 * @param fileReader
+	 * @param inFileName
 	 * @param outFileName
 	 */
 	public static Integer[] codeFromFileToFile(String inFileName, String outFileName) {
@@ -124,11 +144,10 @@ public class BAC_coder {
 		Integer [] output ={};
 		try {
 			fileReader = new PGMFileReader(inFileName);
-			fileWriter = new BACFileWriter();
 			AlphabetIntervals alphabetIntervals = new AlphabetIntervals(fileReader);//TODO: s³abo, ¿e budowanie struktury nie jest oddzielone od czytania pliku
 			//alphabetIntervals.printAlphabetIntervals();//tu bierzemy zwartoœæ ca³ego pliku
 			output=code(alphabetIntervals);//wiêc tu te¿ kodujemy zawartoœæ ca³ego pliku
-			fileWriter.write(output,alphabetIntervals,new File(outFileName));
+			BACFileWriter.write(output,alphabetIntervals,new File(outFileName));
 
 		} catch (IOException e) {
 			e.printStackTrace();
