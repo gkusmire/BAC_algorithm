@@ -11,7 +11,7 @@ class SimpleCodeAndDecodeTest {
 
 	@Test
 	void test() throws IOException {
-		final String s1="laplace_10.pgm";//albo co kto chce
+		final String s1="laplace_30.pgm";//albo co kto chce
 		final String s2="test.bac";
 		final String s3="out.pgm";
 		Integer[] out = BAC_coder.codeFromFileToFile(s1, s2);

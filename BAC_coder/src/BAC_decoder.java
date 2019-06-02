@@ -10,19 +10,15 @@ import java.util.List;
 public class BAC_decoder {
 	
 	public static Integer[] decode(BACFileReader fileReader) throws IOException,ArithmeticException{
-		//int[] s=alphabetIntervals.getFileContent();
-		// PLACEHOLDER - interwa³y ze Ÿród³a
-
-		// pobranie statystyki
-
-		int totalCount = fileReader.getWidth() * fileReader.getHeight();
-
 		// dla wyjaœnienia algorytmu nale¿y zapoznaæ siê najpierw z algorytmem kodera
 		// dzia³a na analogicznej zasadzie
+		// d³ugoœæ oryginalnego ci¹gu
+		int totalCount = fileReader.getWidth() * fileReader.getHeight();
 
 		// inicjalizacja
 		// ustalamy pocz¹tkowe granice przedzia³u - dla dostêpnych 2^m wartoœci po m 0 i 1 w zapisie dwójkowym
-		final int m = 30; // d³ugoœæ s³owa
+        // TODO powi¹zanie z m kodera - czy konieczne?
+		final int m = 24; // d³ugoœæ s³owa
 		// maksymalna wartoœæ - je¿eli wybieramy sobie dowoln¹ d³ugoœæ s³owa,
 		// trzeba pamiêtaæ o zastosowaniu maski bitowej do wyniku przesuniêcia bitowego
 		final int max = (int)Math.pow(2,m) - 1;
@@ -31,18 +27,16 @@ public class BAC_decoder {
 
 		int d = 0;   // ustalamy doln¹ granicê na (0...0)
 		int g = max; // ustalamy górn¹ granicê na (1...1)
-		System.out.println("\nMAX " +max+" datasize " +fileReader.getDataSize()+"\n");
 
 		int t = 0b0; // dekodowane s³owo (?)
 
-		// PLACEHOLDER wyjscie.append(wartosc_bitu) --- wypisywanie wyjœcia
 		List<Integer> wyjscie = new ArrayList<>();
 
 		fileReader.rewind();
 		// wczytanie m bitów z wejœcia do s³owa t
-		// UWAGA: kolejnoœæ wczytywania bitów
-		for(int i = 0; i<m && !fileReader.eof();++i) {
-			t = (t<<1) + fileReader.get();
+		// UWAGA: kolejnoœæ wczytywania bitów z/do rejestru: MSB->LSB
+		for(int i = 0; i < m; i++) {
+			t = (t<<1) | fileReader.get();
 		}
 
 		int count = 0;
@@ -51,18 +45,18 @@ public class BAC_decoder {
 		wyjscie.add(fileReader.getNthSymbol(0));
 		count++;
 
-		while(!fileReader.eof() && count < totalCount) { // dopóki s¹ symbole
+		while(count < totalCount) { // dopóki s¹ symbole
 			int k = 0; // indeks dekodowanego symbolu
-			while(k < fileReader.getNumber()-1 &&(int) Math.floor(((float)(t - d + 1) * (float)totalCount - 1) / (float)(g - d + 1)) >= fileReader.getAlphabetElementInterval(fileReader.getNthSymbol(k)).rightVal()) // leftVal bo od pocz¹tku
+			int r = g - d + 1; // obliczamy szerokoœæ przedzia³u
+
+			while((int) Math.floor(((float)(t - d + 1) * (float)totalCount - 1) / (float)r) >= fileReader.getAlphabetElementInterval(fileReader.getNthSymbol(k)).rightVal()) // leftVal bo od pocz¹tku
 				k++;
-			k = Math.min(k,fileReader.getNumber()-1);
+            if(k >= fileReader.getNumber()) throw new ArrayIndexOutOfBoundsException("Nie ma takiego symbolu!");
 			// zdekoduj symbol x k-ty z linii prawdopodobieñstw
 			int x = fileReader.getNthSymbol(k);
 			wyjscie.add(x);
 			count++;
 
-			//r=gm1-dm1+1;//R = G - D + 1
-			int r = g - d + 1; // obliczamy szerokoœæ przedzia³u
 			int old_d = d;
 			Pair<Integer, Integer> elem = fileReader.getAlphabetElementInterval(x); // zakres wystêpowania symbolu x
 			d = old_d + (int)Math.floor((double)r * ((double)elem.leftVal() / (double)totalCount));
@@ -79,25 +73,18 @@ public class BAC_decoder {
 					// g - przesuniêcie w lewo o 1 i uzupe³nienie jedynk¹
 					g = ((g << 1) | 1) & max;
 					// wczytanie nastêpnego bitu ze strumienia w miejsce MSB
-					//if(fileReader.eof() ) break;
 					t  = ((t<<1) & max) + fileReader.get();
 
 				}
 				// warunek #2
 				else {
-					//przesuñ w lewo bity obu rejestrów z wyj¹tkiem najbardziej
-					//znacz¹cych i uzupe³nij rejestry d i g w lewo: d 0 na LSB, g 1 na LSB
+					// przesuñ w lewo bity obu rejestrów z wyj¹tkiem najbardziej
+					// znacz¹cych i uzupe³nij rejestry d i g w lewo: d 0 na LSB, g 1 na LSB
+                    // complement (new) MSB of g, d, t
 					d = ((d << 1) & (max >> 1)) | (d & (half));
 					g = (((g << 1) | 1) & (max >> 1)) | (g & (half));
-					int newbit = 0;
-					//if(!fileReader.eof() )
-					newbit = fileReader.get();
-
-					// s³owo t w lewo o 1 bit i wczytaj nastêpny bit ze strumienia wejœciowego na LSB
-					t = (((t << 1) & (max>>1)) | (t & half)) + newbit;
-
-					// complement (new) MSB of g, d, t
-					// TODO
+					// j.w. i wczytaj nastêpny bit ze strumienia wejœciowego na LSB
+					t = (((t << 1) & (max>>1)) | (t & half)) + fileReader.get();
 				}
 			}
 		}

@@ -11,7 +11,7 @@ public class BAC_coder {
 
 		// inicjalizacja
 		// ustalamy pocz¹tkowe granice przedzia³u - dla dostêpnych 2^m wartoœci po m 0 i 1 w zapisie dwójkowym
-		final int m = 30; // d³ugoœæ s³owa
+		final int m = 24; // d³ugoœæ s³owa
 		// maksymalna wartoœæ - je¿eli wybieramy sobie dowoln¹ d³ugoœæ s³owa,
 		// trzeba pamiêtaæ o zastosowaniu maski bitowej do wyniku przesuniêcia bitowego
 		final int MAXVAL = (int)Math.pow(2,m) - 1;
@@ -114,22 +114,6 @@ public class BAC_coder {
 			AlphabetIntervals alphabetIntervals = new AlphabetIntervals(fileReader);//TODO: s³abo, ¿e budowanie struktury nie jest oddzielone od czytania pliku
 			//alphabetIntervals.printAlphabetIntervals();//tu bierzemy zwartoœæ ca³ego pliku
 			output=code(alphabetIntervals);//wiêc tu te¿ kodujemy zawartoœæ ca³ego pliku
-			/*
-			FileOutputStream fos = new FileOutputStream(outFileName);
-			byte[] ca=new byte[output.length];
-			for(int i=0;i<output.length;i++)
-			{
-				ca[i]=(byte)output[i].intValue();
-				if(output[i]<0 || output[i]>255)
-					System.err.println("output[i]="+output[i]);
-				if((ca[i]&0xFF) != output[i]) {
-					System.err.println("ca[i]&0xFF="+(ca[i]&0xFF)+" output[i]="+output[i]);
-				}
-			}
-			fos.write(ca,0,ca.length);
-			fos.flush();
-			fos.close();
-			*/
 			fileWriter.write(output,alphabetIntervals,new File(outFileName));
 
 		} catch (IOException e) {
