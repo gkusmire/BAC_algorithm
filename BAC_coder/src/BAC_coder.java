@@ -77,56 +77,24 @@ public class BAC_coder {
 		}
 		// Jeœli nie ma wiêcej symboli zakoñczenie: dopisz do wyjœcia wszystkie znacz¹ce bity z d
 		int sb = 1 << (m-1);
-		System.out.println("KOÑCZENIE KODOWANIE d="+d+", ln="+ln);
-		// wyprowadzanie ln
+		System.out.println("KOÑCZENIE KODOWANIE d="+d+", g="+g+", ln="+ln);
 
-		int i = 0;
-		for(;i<ln;i++) {
-			wyjscie.put((d&half) > 0 ? 1 : 0);
-			d<<=1;
-		}
-		while(ln>0) {
+		// wyprowadzenie statusu znacznika
+		// 1. pierwszy bit d
+		wyjscie.put((d & half) > 0 ? 1 : 0);
+		d = (d << 1) & MAXVAL;
+		// 2. jedynki w liczbie ln (hardkodowane bo z d wychodz¹ jedynki - por. g³ówna pêtla)
+		while (ln > 0) {
 			wyjscie.put(1);
 			ln--;
 		}
-		for(;i<m;i++) {
-			wyjscie.put((d&half) > 0 ? 1 : 0);
-			d<<=1;
-		}
-		/*
-		while (ln > 0) {
-			int val = 1 - ((d&half) > 0 ? 1 : 0);
-			System.out.print(val);
-			wyjscie.put(val);
-			ln--;
-		}
-		/*
-		if(ln>0) {
-			while ((sb & ln) == 0 && sb>0)
-				sb >>= 1;
-			while(sb > 0) {
-				int val = (sb & ln) > 0 ? 1 : 0;
-				System.out.print(val);
-				wyjscie.put(val);
-				sb >>= 1;
-			}
+		// 3. reszta d
+		for(int i = 1;i<m;++i) {
+			int b = (d & half) > 0 ? 1 : 0;
+			d = (d << 1) & MAXVAL;
+			wyjscie.put(b);
 		}
 
-		System.out.println("; ");
-		sb = 1 << (m-1);
-		// wyprowadzanie d
-		if(d > 0) { // s¹ znacz¹ce bity
-			//while ((sb & d) == 0)
-			//	sb >>= 1;
-			while (sb > 0) {
-				int val = (sb & d) > 0 ? 1 : 0;
-				System.out.print(val);
-				wyjscie.put(val);
-				sb >>= 1;
-			}
-		} else wyjscie.put(0);
-		System.out.println(" ");
-*/
 		// i co teras? --- dos³aæ zera do pe³nych bajtów, czy te¿ koniecznie musi byæ równie¿ podzielne przez d³ugoœæ s³owa?
         // s³owa --- nie ma b³êdów z eof
 		while(wyjscie.getLength()%8 != 0 || wyjscie.getLength()%m != 0)
