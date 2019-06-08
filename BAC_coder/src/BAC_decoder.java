@@ -21,7 +21,7 @@ public class BAC_decoder {
 		final int m = 24; // d³ugoœæ s³owa
 		// maksymalna wartoœæ - je¿eli wybieramy sobie dowoln¹ d³ugoœæ s³owa,
 		// trzeba pamiêtaæ o zastosowaniu maski bitowej do wyniku przesuniêcia bitowego
-		final long max = (int)Math.pow(2,m) - 1;
+		final long max = (long)Math.pow(2,m) - 1;
 		final long half = 0b1 << (m-1);
 		final long quat = 0b1 << (m-2);
 
@@ -74,7 +74,7 @@ public class BAC_decoder {
 					g = ((g << 1) | 1) & max;
 					// wczytanie nastêpnego bitu ze strumienia w miejsce MSB
 					int val = 0;
-					if(!fileReader.eof()) val = fileReader.get();
+					if(!fileReader.eof()) val = fileReader.get(); else System.out.println("EOF (1)");
 					t  = ((t<<1) & max) + val;
 
 				}
@@ -87,7 +87,7 @@ public class BAC_decoder {
 					g = (((g << 1) | 1) & (max >> 1)) | (g & (half));
 					// j.w. i wczytaj nastêpny bit ze strumienia wejœciowego na LSB
 					int val = 0;
-					if(!fileReader.eof()) val = fileReader.get();
+					if(!fileReader.eof()) val = fileReader.get(); else System.out.println("EOF (2)");
 					t = (((t << 1) & (max>>1)) | (t & half)) + val;
 				}
 			}

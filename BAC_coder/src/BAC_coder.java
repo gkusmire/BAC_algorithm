@@ -3,29 +3,29 @@ import java.io.IOException;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.BitSet;
-
+import java.util.Arrays;
 public class BAC_coder {
 	
 	public static Integer[] code(AlphabetIntervals alphabetIntervals) throws ArithmeticException {//TODO: ta metoda ma zakodowaæ ci¹g znaków
 		int[] s=alphabetIntervals.getFileContent();
+		final long totalCount = s.length;
+
+		s = Arrays.copyOf(s,s.length+2);
+		s[(int)totalCount] = alphabetIntervals.getNthSymbol(0);
+		s[(int)totalCount+1] = alphabetIntervals.getNthSymbol(0);
 
 		// inicjalizacja
 		// ustalamy pocz¹tkowe granice przedzia³u - dla dostêpnych 2^m wartoœci po m 0 i 1 w zapisie dwójkowym
 		final int m = 24; // d³ugoœæ s³owa
 		// maksymalna wartoœæ - je¿eli wybieramy sobie dowoln¹ d³ugoœæ s³owa,
 		// trzeba pamiêtaæ o zastosowaniu maski bitowej do wyniku przesuniêcia bitowego
-		long _max = 0;
-		for(int i = 0; i < m; i++)
-			_max = (_max<<1) | 1;
-		System.out.println((_max));
-		final long MAXVAL = _max;
+        final long MAXVAL = (long)Math.pow(2,m) - 1;
 		final long half = 0b1 << (m-1); // w praktyce: maska dla najstarszego bitu s³owa
 		final long quat = 0b1 << (m-2);// w praktyce: maska dla drugiego najstarszego bitu s³owa
 
 		long d = 0; // ustalamy doln¹ granicê na (0...0)
 		long g = MAXVAL; // ustalamy górn¹ granicê na (1...1)
 		long ln=0; // licznik niedomiaru; Sayood: Scale3
-		final long totalCount = s.length;
 
 		BitStream wyjscie = new BitStream();
 
@@ -33,7 +33,7 @@ public class BAC_coder {
 		if((MAXVAL << 1) <= MAXVAL) throw(new ArithmeticException("Niewystarczaj¹ca d³ugoœæ typu liczbowego!"));
 		if(totalCount > MAXVAL) throw(new ArithmeticException("Niewystarczaj¹ca d³ugoœæ typu liczbowego!"));
 
-		for(int i=0;i<totalCount;i++)
+		for(int i=0;i<totalCount+2;i++)
 		{
 			long r = g - d + 1; // obliczamy szerokoœæ przedzia³u
 
@@ -81,17 +81,21 @@ public class BAC_coder {
 		// wyprowadzanie ln
 
 		int i = 0;
-		for(;i<ln;i++) {
-			wyjscie.put((d&half) > 0 ? 1 : 0);
-			d<<=1;
-		}
-		while(ln>0) {
-			wyjscie.put(1);
-			ln--;
-		}
-		for(;i<m;i++) {
-			wyjscie.put((d&half) > 0 ? 1 : 0);
-			d<<=1;
+		if(d>0) {
+
+			for (; i < ln; i++) {
+				wyjscie.put((d & half) > 0 ? 1 : 0);
+				d <<= 1;
+			}
+			long v = (d&half);
+			while (ln > 0) {
+				wyjscie.put((int)(1-v));
+				ln--;
+			}
+			for (; i < m; i++) {
+				wyjscie.put((d & half) > 0 ? 1 : 0);
+				d <<= 1;
+			}
 		}
 		/*
 		while (ln > 0) {
@@ -144,8 +148,8 @@ public class BAC_coder {
 	 */
 	public static Integer[] codeFromFileToFile(String inFileName, String outFileName) {
 		PGMFileReader fileReader;
-		BACFileWriter fileWriter;
 		Integer [] output ={};
+
 		try {
 			fileReader = new PGMFileReader(inFileName);
 			AlphabetIntervals alphabetIntervals = new AlphabetIntervals(fileReader);//TODO: s³abo, ¿e budowanie struktury nie jest oddzielone od czytania pliku
