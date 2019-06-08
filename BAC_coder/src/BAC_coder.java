@@ -10,9 +10,10 @@ public class BAC_coder {
 		int[] s=alphabetIntervals.getFileContent();
 		final long totalCount = s.length;
 
-		s = Arrays.copyOf(s,s.length+2);
-		s[(int)totalCount] = alphabetIntervals.getNthSymbol(0);
-		s[(int)totalCount+1] = alphabetIntervals.getNthSymbol(0);
+		int safety = 2;
+		s = Arrays.copyOf(s,s.length+safety);
+		for(int i = 0;i<safety;i++)
+		    s[(int)totalCount+i] = alphabetIntervals.getNthSymbol(0);
 
 		// inicjalizacja
 		// ustalamy pocz¹tkowe granice przedzia³u - dla dostêpnych 2^m wartoœci po m 0 i 1 w zapisie dwójkowym
@@ -33,7 +34,7 @@ public class BAC_coder {
 		if((MAXVAL << 1) <= MAXVAL) throw(new ArithmeticException("Niewystarczaj¹ca d³ugoœæ typu liczbowego!"));
 		if(totalCount > MAXVAL) throw(new ArithmeticException("Niewystarczaj¹ca d³ugoœæ typu liczbowego!"));
 
-		for(int i=0;i<totalCount+2;i++)
+		for(int i=0;i<totalCount+safety;i++)
 		{
 			long r = g - d + 1; // obliczamy szerokoœæ przedzia³u
 
@@ -80,57 +81,12 @@ public class BAC_coder {
 		System.out.println("KOÑCZENIE KODOWANIE d="+d+", ln="+ln);
 		// wyprowadzanie ln
 
-		int i = 0;
 		if(d>0) {
-
-			for (; i < ln; i++) {
-				wyjscie.put((d & half) > 0 ? 1 : 0);
-				d <<= 1;
-			}
-			long v = (d&half);
-			while (ln > 0) {
-				wyjscie.put((int)(1-v));
-				ln--;
-			}
-			for (; i < m; i++) {
+			for (int i = 0; i < m; i++) {
 				wyjscie.put((d & half) > 0 ? 1 : 0);
 				d <<= 1;
 			}
 		}
-		/*
-		while (ln > 0) {
-			int val = 1 - ((d&half) > 0 ? 1 : 0);
-			System.out.print(val);
-			wyjscie.put(val);
-			ln--;
-		}
-		/*
-		if(ln>0) {
-			while ((sb & ln) == 0 && sb>0)
-				sb >>= 1;
-			while(sb > 0) {
-				int val = (sb & ln) > 0 ? 1 : 0;
-				System.out.print(val);
-				wyjscie.put(val);
-				sb >>= 1;
-			}
-		}
-
-		System.out.println("; ");
-		sb = 1 << (m-1);
-		// wyprowadzanie d
-		if(d > 0) { // s¹ znacz¹ce bity
-			//while ((sb & d) == 0)
-			//	sb >>= 1;
-			while (sb > 0) {
-				int val = (sb & d) > 0 ? 1 : 0;
-				System.out.print(val);
-				wyjscie.put(val);
-				sb >>= 1;
-			}
-		} else wyjscie.put(0);
-		System.out.println(" ");
-*/
 		// i co teras? --- dos³aæ zera do pe³nych bajtów, czy te¿ koniecznie musi byæ równie¿ podzielne przez d³ugoœæ s³owa?
         // s³owa --- nie ma b³êdów z eof
 		while(wyjscie.getLength()%8 != 0 || wyjscie.getLength()%m != 0)
