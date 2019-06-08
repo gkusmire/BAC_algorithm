@@ -1,9 +1,5 @@
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +17,7 @@ public class BAC_decoder {
 		final int m = 24; // d³ugoœæ s³owa
 		// maksymalna wartoœæ - je¿eli wybieramy sobie dowoln¹ d³ugoœæ s³owa,
 		// trzeba pamiêtaæ o zastosowaniu maski bitowej do wyniku przesuniêcia bitowego
-		final long max = (int)Math.pow(2,m) - 1;
+		final long max = (long)Math.pow(2,m) - 1;
 		final long half = 0b1 << (m-1);
 		final long quat = 0b1 << (m-2);
 
