@@ -140,7 +140,7 @@ public class BAC_coder {
     	if(args.length>1)
     		outFileName=args[0];
     	else
-    		outFileName="encoded.txt";
+    		outFileName="encoded.bac";
     	codeFromFileToFile(inFileName,outFileName);
     }
 }

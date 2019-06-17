@@ -103,7 +103,7 @@ public class BAC_decoder {
 		BACFileReader fileReader;
 
 		try {
-			 fileReader = new BACFileReader("test.bac");
+			 fileReader = new BACFileReader(inFileName);
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.err.println("B³¹d odczytu danych z pliku!!!");
@@ -167,7 +167,7 @@ public class BAC_decoder {
     		outFileName=args[0];
     	else
     		outFileName="decoded.pgm";
-    	//decodeFromFileToFile(inFileName,outFileName);
+    	decodeFromFileToFile(inFileName,outFileName);
 	}
 
 }
