@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class BAC_decoder {
@@ -26,7 +27,8 @@ public class BAC_decoder {
 
 		long t = 0b0; // dekodowane s³owo (?)
 
-		List<Integer> wyjscie = new ArrayList<>();
+		Integer [] wyjscie = new Integer[(int)totalCount];
+		Arrays.fill(wyjscie,0);
 
 		fileReader.rewind();
 		// wczytanie m bitów z wejœcia do s³owa t
@@ -48,7 +50,7 @@ public class BAC_decoder {
             if(k >= fileReader.getNumber()) throw new ArrayIndexOutOfBoundsException("Nie ma takiego symbolu!");
 			// zdekoduj symbol x k-ty z linii prawdopodobieñstw
 			int x = fileReader.getNthSymbol(k);
-			wyjscie.add(x);
+			wyjscie[count] = x;
 			count++;
 
 			long old_d = d;
@@ -70,7 +72,7 @@ public class BAC_decoder {
 					g = ((g << 1) | 1) & max;
 					// wczytanie nastêpnego bitu ze strumienia w miejsce MSB
 					int val = 0;
-					if(!fileReader.eof()) val = fileReader.get();
+					if(!fileReader.eof()) val = fileReader.get(); else System.out.println("EOF (1)");
 					t  = ((t<<1) & max) + val;
 
 				}
@@ -83,14 +85,14 @@ public class BAC_decoder {
 					g = (((g << 1) | 1) & (max >> 1)) | (g & (half));
 					// j.w. i wczytaj nastêpny bit ze strumienia wejœciowego na LSB
 					int val = 0;
-					if(!fileReader.eof()) val = fileReader.get();
+					if(!fileReader.eof()) val = fileReader.get(); else System.out.println("EOF (2)");
 					t = (((t << 1) & (max>>1)) | (t & half)) + val;
 				}
 			}
 		}
 		System.out.println("ITERACJE "+count);
 
-		return wyjscie.toArray(Integer[]::new);
+		return wyjscie;
 	}
 	
 	public static void decodeFromFileToFile(String inFileName,String outFileName) {

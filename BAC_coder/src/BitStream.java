@@ -32,7 +32,8 @@ public class BitStream {
     }
 
     public Integer[] asArray() {
-        return list.toArray(Integer[]::new);
+        Integer [] arr = new Integer[list.size()];
+        return list.toArray(arr);
     }
 
     public Integer getLength() { return length; };

@@ -13,7 +13,6 @@ public class BACFileReader {
         fileName = _fileName;
         data = new ArrayList<>();
         init(fileName);
-
     }
 
     public int getElement() throws IOException {
@@ -96,8 +95,6 @@ public class BACFileReader {
         fillAlphabetIntervals(Arrays.copyOfRange(stats, 1, stats.length));
 
     }
-
-    public Integer[] getData() { return data.toArray(Integer[]::new); }
 
     private void initReader(String fileName) throws IOException {
 
